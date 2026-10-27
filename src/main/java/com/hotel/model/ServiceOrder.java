@@ -27,7 +27,7 @@ public class ServiceOrder {
         this.services = services;
     }
 
-    public void setReservation(Reservation reservation) {
+    public  void setReservation(Reservation reservation) {
         this.reservation = reservation;
     }
 
@@ -48,5 +48,5 @@ public class ServiceOrder {
     }
 }
 
-}
+
 

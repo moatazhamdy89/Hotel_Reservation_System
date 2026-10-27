@@ -1,0 +1,28 @@
+package com.hotel.model;
+
+import com.hotel.enums.RoomStatus;
+import com.hotel.enums.ViewType;
+
+public class DoubleRoom extends Room {
+    private boolean doubleBedAvailable;
+
+    public DoubleRoom(int roomId, int roomNumber, int floorNumber, double basePrice, RoomStatus status, ViewType viewType, String description, boolean doubleBedAvailable) {
+        super(roomId, roomNumber, floorNumber, basePrice, status, viewType, description, 2);
+        this.doubleBedAvailable = doubleBedAvailable;
+    }
+
+    public boolean canAddExtraBed() {
+        boolean isAvailable = (this.status == RoomStatus.AVAILABLE);
+        boolean hasCapacity = (this.maxGuests >= 2);
+        return isAvailable && hasCapacity && doubleBedAvailable;
+    }
+
+    public boolean isDoubleBedAvailable() {
+        return doubleBedAvailable;
+    }
+
+    public void setDoubleBedAvailable(boolean doubleBedAvailable) {
+        this.doubleBedAvailable = doubleBedAvailable;
+    }
+}
+
