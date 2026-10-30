@@ -194,12 +194,5 @@ public class EventBooking {
 
     // Called by DAO after INSERT
     public void assignId(int bookingId) {
-
-        if (this.bookingId != 0 || bookingId <= 0) {
-            throw new IllegalStateException(
-                    "Invalid booking ID assignment");
-        }
-
-        this.bookingId = bookingId;
     }
 }
