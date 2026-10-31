@@ -1,26 +1,42 @@
 package com.hotel.model;
+
+import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+@Entity
+@Table(name = "event_halls")
 public class EventHall {
 
+    @Id // 3shan da primary key f 3mlna @ID
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-increment
+    @Column(name = "hall_id")
     private int hallId;
+
+    @Column(name = "hall_name")
     private String hallName;
+
+    @Column(name = "location")
     private String location;
+
+    @JdbcTypeCode(SqlTypes.DECIMAL)
+    @Column(name = "rental_price", precision = 10, scale = 2)
     private double rentalPrice;
+
+    @Column(name = "max_capacity")
     private int maxCapacity;
 
-    // New hall - MySQL generates the ID
-    public EventHall(String hallName, String location,
-                     double rentalPrice, int maxCapacity) {
-        setHallName(hallName);
-        setLocation(location);
-        setRentalPrice(rentalPrice);
-        setMaxCapacity(maxCapacity);
+    // Required by Hibernate
+    protected EventHall() {
     }
 
-    // Existing hall loaded from database
-    public EventHall(int hallId, String hallName, String location,
+    // Constructor for creating a new hall
+    public EventHall(String hallName, String location,
                      double rentalPrice, int maxCapacity) {
-        this(hallName, location, rentalPrice, maxCapacity);
-        setHallId(hallId);
+        this.hallName= hallName;
+        this.location = location;
+        this.rentalPrice = rentalPrice;
+        this.maxCapacity = maxCapacity;
     }
 
     public int getHallId() {
@@ -41,13 +57,6 @@ public class EventHall {
 
     public int getMaxCapacity() {
         return maxCapacity;
-    }
-
-    public void setHallId(int hallId) {
-        if (hallId <= 0) {
-            throw new IllegalArgumentException("Invalid hall ID");
-        }
-        this.hallId = hallId;
     }
 
     public void setHallName(String hallName) {

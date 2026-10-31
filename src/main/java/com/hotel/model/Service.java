@@ -1,15 +1,46 @@
 package com.hotel.model;
+
+import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
-import  java.time.DayOfWeek;
+import java.time.DayOfWeek;
+
+@Entity
+@Table(name = "services")
 public class Service {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "service_id")
     private int serviceId;
+
+    @Column(name = "service_name", nullable = false, length = 255)
     private String serviceName;
+
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    @Column(name = "description", columnDefinition = "text")
     private String description;
+
+    @JdbcTypeCode(SqlTypes.DECIMAL)
+    @Column(name = "price", precision = 10, scale = 2)
     private double price;
+
+    @Column(name = "is_available")
     private boolean isAvailable;
+
+    @Column(name = "service_date")
     private LocalDate serviceDate;
+
+    @Column(name = "start_time")
     private LocalTime startTime;
+
+    // Required by Hibernate
+    protected Service() {
+    }
+
     public Service(
             String serviceName,
             String description,
@@ -29,6 +60,7 @@ public class Service {
     public void toggleAvailability() {
         this.isAvailable = !this.isAvailable;
     }
+
     public String getServiceDetails() {
         return "Service ID: " + serviceId +
                 ", Name: " + serviceName +
@@ -38,9 +70,11 @@ public class Service {
                 ", Date: " + serviceDate +
                 ", Start Time: " + startTime;
     }
+
     public LocalDate getServiceDate() {
         return serviceDate;
     }
+
     public DayOfWeek getDayOfWeek() {
         if (serviceDate != null) {
             return serviceDate.getDayOfWeek();
@@ -80,8 +114,8 @@ public class Service {
     public double getPrice() {
         return price;
     }
-    public void setPrice(double price) {
 
+    public void setPrice(double price) {
         if (!Double.isFinite(price) || price < 0) {
             throw new IllegalArgumentException(
                     "Service price must be valid and non-negative"
@@ -107,5 +141,3 @@ public class Service {
         return serviceId;
     }
 }
-
-
