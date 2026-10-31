@@ -1,12 +1,22 @@
-
 package com.hotel.model;
 
 import com.hotel.enums.EventBookingStatus;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "event_invoices")
+@PrimaryKeyJoinColumn(name = "invoice_id")
 public class EventInvoice extends Invoice {
 
     // Linked to one event booking; no setter to prevent changing it
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_booking_id", nullable = false, unique = true)
     private EventBooking eventBooking;
+
+    // Required by Hibernate when loading an existing invoice
+    protected EventInvoice() {
+        super();
+    }
 
     // Create a NEW invoice for a confirmed event booking
     public EventInvoice(EventBooking eventBooking) {

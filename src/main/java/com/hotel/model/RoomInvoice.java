@@ -1,13 +1,32 @@
-
 package com.hotel.model;
 
 import com.hotel.enums.ReservationStatus;
+import jakarta.persistence.*;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+@Entity
+@Table(name = "room_invoices")
+@PrimaryKeyJoinColumn(name = "invoice_id")
 public class RoomInvoice extends Invoice {
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reservation_id", nullable = false, unique = true)
     private Reservation reservation;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_order_id", unique = true)
     private ServiceOrder serviceOrder;
+
+    @JdbcTypeCode(SqlTypes.DECIMAL)
+    @Column(name = "discount_amount", precision = 10, scale = 2)
     private double discountAmount;
+
+    // Required by Hibernate
+    protected RoomInvoice() {
+        super();
+    }
 
     // NEW invoice issued during checkout
     public RoomInvoice(Reservation reservation, ServiceOrder serviceOrder) {

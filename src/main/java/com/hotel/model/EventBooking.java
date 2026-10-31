@@ -1,22 +1,61 @@
 package com.hotel.model;
 
 import com.hotel.enums.EventBookingStatus;
+import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "event_bookings")
 public class EventBooking {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "booking_id")
     private int bookingId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hall_id", nullable = false)
     private EventHall hall;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "guest_id")
     private Guest guest;
+
+    @Column(name = "external_client_name")
     private String externalClientName;
+
+    @Column(name = "external_client_phone")
     private String externalClientPhone;
+
+    @Column(name = "external_client_national_id")
     private String externalClientNationalId;
+
+    @Column(name = "start_date_time")
     private LocalDateTime startDateTime;
+
+    @Column(name = "end_date_time")
     private LocalDateTime endDateTime;
+
+    @JdbcTypeCode(SqlTypes.DECIMAL)
+    @Column(name = "deposit_amount", precision = 10, scale = 2)
     private double depositAmount;
+
+    @Column(name = "deposit_paid")
     private boolean depositPaid;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private EventBookingStatus status;
+
+    @Column(name = "cancellation_reason")
     private String cancellationReason;
+
+    // Required by Hibernate
+    protected EventBooking() {
+    }
 
     // Constructor for a registered guest
     public EventBooking(EventHall hall, Guest guest,
@@ -140,8 +179,6 @@ public class EventBooking {
 
         status = EventBookingStatus.CANCELLED;
         cancellationReason = reason;
-
-        // Paid deposit remains paid (non-refundable)
     }
 
     public int getBookingId() {
@@ -192,7 +229,7 @@ public class EventBooking {
         return cancellationReason;
     }
 
-    // Called by DAO after INSERT
+    // Kept temporarily for old DAO compatibility
     public void assignId(int bookingId) {
 
         if (this.bookingId != 0 || bookingId <= 0) {

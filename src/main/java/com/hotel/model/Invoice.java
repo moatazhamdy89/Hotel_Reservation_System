@@ -1,15 +1,32 @@
-
 package com.hotel.model;
 
 import com.hotel.enums.PaymentMethod;
+import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
+@Entity
+@Table(name = "invoices")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Invoice {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "invoice_id")
     protected int invoiceId;                 // 0 = no ID assigned yet
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
     protected PaymentMethod paymentMethod;   // null until paid
+
+    @Column(name = "is_paid")
     protected boolean isPaid;
+
+    @JdbcTypeCode(SqlTypes.DECIMAL)
+    @Column(name = "total_amount", precision = 10, scale = 2)
     protected double totalAmount;            // frozen when issued
 
+    @Transient
     private boolean totalLocked = false;
 
     // Used when creating a new invoice
