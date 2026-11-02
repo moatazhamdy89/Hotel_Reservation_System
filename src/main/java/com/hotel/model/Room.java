@@ -10,7 +10,7 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "rooms")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Room {
+public abstract class Room {
 
     @Id
     @Column(name = "room_id")

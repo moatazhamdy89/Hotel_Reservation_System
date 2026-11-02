@@ -14,6 +14,7 @@ public abstract class User {
     protected int nationalID;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     protected int userID;
 
@@ -37,6 +38,8 @@ public abstract class User {
 
     @Column(name = "role")
     protected String role;
+
+
 
     @Transient
     private boolean loggedIn = false;
@@ -130,4 +133,6 @@ public abstract class User {
         System.out.println("Email: " + email);
         System.out.println("Role: " + role);
     }
+
+
 }

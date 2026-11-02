@@ -142,9 +142,7 @@ public class Guest extends User {
         System.out.println("Phone: " + phone);
     }
 
-    public void viewProfile() {
-        displayProfile();
-    }
+
 
     public void viewPoints() {
         System.out.println(

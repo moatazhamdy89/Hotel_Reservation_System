@@ -185,20 +185,6 @@ public class Reservation {
         this.cancellationDate = LocalDate.now();
     }
 
-    // Kept temporarily for old DAO compatibility
-    public void assignId(int generatedId) {
-        if (reservationId != 0) {
-            throw new IllegalStateException(
-                    "Reservation already has ID " + reservationId);
-        }
-
-        if (generatedId <= 0) {
-            throw new IllegalArgumentException(
-                    "Generated ID must be positive");
-        }
-
-        this.reservationId = generatedId;
-    }
 
     public boolean isSaved() {
         return reservationId > 0;

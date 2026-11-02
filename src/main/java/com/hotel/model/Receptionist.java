@@ -140,40 +140,22 @@ public class Receptionist extends User {
         guest.displayProfile();
     }
 
-    public void updateRoomStatus(Room room,
-                                 RoomStatus newStatus) {
+    public void updateRoomStatus(Room room, RoomStatus newStatus) {
         requireLoggedIn();
 
-        if (room == null)
-            throw new IllegalArgumentException(
-                    "Room is required");
+        if (room == null) {
+            throw new IllegalArgumentException("Room is required");
+        }
 
-        if (newStatus == null)
-            throw new IllegalArgumentException(
-                    "Status is required");
+        if (newStatus == null) {
+            throw new IllegalArgumentException("Status is required");
+        }
 
-        HibernateRepository repository =
-                new HibernateRepository();
-
-        repository.withTransaction(session -> {
-
-            Room savedRoom =
-                    session.find(Room.class, room.getRoomId());
-
-            if (savedRoom == null)
-                throw new IllegalStateException(
-                        "Room " + room.getRoomId()
-                                + " not found in database");
-
-            savedRoom.setStatus(newStatus);
-
-            return null;
-        });
-
-        // Update local object only after successful commit
         room.setStatus(newStatus);
-    }
 
+        HibernateRepository repository = new HibernateRepository();
+        repository.update(room);
+    }
     public RoomStatus viewRoomStatus(Room room) {
         requireLoggedIn();
 

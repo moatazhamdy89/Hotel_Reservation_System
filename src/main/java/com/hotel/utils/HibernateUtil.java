@@ -42,6 +42,8 @@ public class HibernateUtil {
                 .addAnnotatedClass(Guest.class)
                 .addAnnotatedClass(LoyaltyProgram.class)
                 .addAnnotatedClass(Receptionist.class)
+                .addAnnotatedClass(Admin.class)
+                .addAnnotatedClass(Review.class)
 
 
 

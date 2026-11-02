@@ -229,14 +229,4 @@ public class EventBooking {
         return cancellationReason;
     }
 
-    // Kept temporarily for old DAO compatibility
-    public void assignId(int bookingId) {
-
-        if (this.bookingId != 0 || bookingId <= 0) {
-            throw new IllegalStateException(
-                    "Invalid booking ID assignment");
-        }
-
-        this.bookingId = bookingId;
-    }
 }

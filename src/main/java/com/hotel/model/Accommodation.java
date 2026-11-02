@@ -33,7 +33,7 @@ public class Accommodation {
     }
 
     public double getPricePerNight() {
-        return choosingAccommodationType();
+        return pricePerNight;
     }
 
     public void setPricePerNight(double pricePerNight) {
@@ -41,16 +41,6 @@ public class Accommodation {
         this.pricePerNight = pricePerNight;
     }
 
-    public double choosingAccommodationType ( ){
-        if (type == AccommodationType.BREAKFAST) {
-            pricePerNight = 600;
-        } else if (type == AccommodationType.HALF_BOARD) {
-            pricePerNight = 1000;
-        } else {
-            pricePerNight = 1500;
-        }
-        return pricePerNight;
-    }
 
 
     public static void validatePrice(double price) {
