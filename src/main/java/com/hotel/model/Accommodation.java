@@ -41,8 +41,6 @@ public class Accommodation {
         this.pricePerNight = pricePerNight;
     }
 
-
-
     public static void validatePrice(double price) {
         if (!Double.isFinite(price) || price < 0) { // because Double.isInFinite() can't catch NAN.
             throw new IllegalArgumentException("Invalid Price");

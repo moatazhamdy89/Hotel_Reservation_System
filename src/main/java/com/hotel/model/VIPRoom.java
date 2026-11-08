@@ -44,11 +44,6 @@ public class VIPRoom extends Room {
         this.hasButlerService = hasButlerService;
     }
 
-    public boolean hasVipLoungeAccess() {
-        return this.status != RoomStatus.UNDER_MAINTAINANCE
-                && hasVipLoungeAccess;
-    }
-
     public void setHasVipLoungeAccess(boolean hasVipLoungeAccess) {
         this.hasVipLoungeAccess = hasVipLoungeAccess;
     }

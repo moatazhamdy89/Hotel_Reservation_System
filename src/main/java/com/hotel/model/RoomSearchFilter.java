@@ -1,55 +1,93 @@
 package com.hotel.model;
+
 import com.hotel.enums.ViewType;
 
 public class RoomSearchFilter {
-        private ViewType desiredView;
-        private double minPrice;
-        private double maxPrice;
 
-        public RoomSearchFilter(ViewType desiredView, double minPrice, double maxPrice) {
-            this.desiredView = desiredView;
-            this.minPrice = minPrice >= 0 ? minPrice : 0.0;
-            this.maxPrice = maxPrice >= this.minPrice ? maxPrice : Double.MAX_VALUE;
+    private final Class<? extends Room> desiredRoomType;
+    private final ViewType desiredView;
+    private final double minPrice;
+    private final double maxPrice;
+    private final int numberOfGuests;
+
+    public RoomSearchFilter(
+            Class<? extends Room> desiredRoomType,
+            ViewType desiredView,
+            double minPrice,
+            double maxPrice,
+            int numberOfGuests) {
+
+        if (desiredRoomType != SingleRoom.class &&
+                desiredRoomType != DoubleRoom.class &&
+                desiredRoomType != SuiteRoom.class &&
+                desiredRoomType != VIPRoom.class) {
+            throw new IllegalArgumentException(
+                    "Please select a valid room type");
         }
 
-        public boolean matches(Room room) {
-            if (room == null) {
-                return false;
-            }
-
-            boolean matchesView = (this.desiredView == null || room.getViewType() == this.desiredView);
-            boolean matchesPrice = (room.getBasePrice() >= this.minPrice && room.getBasePrice() <= this.maxPrice);
-            boolean isAvailable = room.isAvailable();
-
-            return matchesView && matchesPrice && isAvailable;
+        if (numberOfGuests <= 0) {
+            throw new IllegalArgumentException(
+                    "Number of guests must be positive");
         }
 
-        public ViewType getDesiredView() {
-            return desiredView;
+        if (!Double.isFinite(minPrice) ||
+                !Double.isFinite(maxPrice) ||
+                minPrice < 0 ||
+                maxPrice < minPrice) {
+            throw new IllegalArgumentException(
+                    "Invalid price range");
         }
 
-        public void setDesiredView(ViewType desiredView) {
-            this.desiredView = desiredView;
-        }
-
-        public double getMinPrice() {
-            return minPrice;
-        }
-
-        public void setMinPrice(double minPrice) {
-            if (minPrice >= 0) {
-                this.minPrice = minPrice;
-            }
-        }
-
-        public double getMaxPrice() {
-            return maxPrice;
-        }
-
-        public void setMaxPrice(double maxPrice) {
-            if (maxPrice >= this.minPrice) {
-                this.maxPrice = maxPrice;
-            }
-        }
+        this.desiredRoomType = desiredRoomType;
+        this.desiredView = desiredView;
+        this.minPrice = minPrice;
+        this.maxPrice = maxPrice;
+        this.numberOfGuests = numberOfGuests;
     }
 
+    public boolean matches(Room room) {
+
+        if (room == null) {
+            return false;
+        }
+
+        boolean matchesType =
+                desiredRoomType.isInstance(room); // check it is from class room or anything extends from room or not
+
+        boolean matchesView =
+                desiredView == null ||
+                        room.getViewType() == desiredView;
+
+        boolean matchesPrice =
+                room.getBasePrice() >= minPrice &&
+                        room.getBasePrice() <= maxPrice;
+
+        boolean matchesCapacity =
+                room.getMaxGuests() >= numberOfGuests;
+
+        return matchesType &&
+                matchesView &&
+                matchesPrice &&
+                matchesCapacity;
+    }
+
+    public Class<? extends Room> getDesiredRoomType() {
+        return desiredRoomType;
+    }
+
+    public ViewType getDesiredView() {
+        return desiredView;
+    }
+
+    public double getMinPrice() {
+        return minPrice;
+    }
+
+    public double getMaxPrice() {
+        return maxPrice;
+    }
+
+    public int getNumberOfGuests() {
+        return numberOfGuests;
+    }
+}

@@ -1,4 +1,3 @@
-
 package com.hotel.manager;
 
 import com.hotel.model.Admin;
@@ -13,6 +12,18 @@ public class UserManager {
 
     private final HibernateRepository repository =
             new HibernateRepository();
+
+    // Check if the current user is an Admin
+    private boolean isAdmin(int currentUserId) {
+
+        if (currentUserId <= 0) {
+            return false;
+        }
+
+        User currentUser = findUserById(currentUserId);
+
+        return currentUser instanceof Admin;
+    }
 
     // Register a new Guest
     public Guest registerGuest(
@@ -43,6 +54,7 @@ public class UserManager {
 
     // Register a new Receptionist
     public Receptionist registerReceptionist(
+            int currentUserId,
             int nationalID,
             String firstName,
             String lastName,
@@ -52,6 +64,11 @@ public class UserManager {
             String rawPassword,
             String phone,
             String shift) {
+
+        if (!isAdmin(currentUserId)) {
+            throw new SecurityException(
+                    "Only Admin can register Receptionists");
+        }
 
         Receptionist receptionist =
                 Receptionist.createForRegistration(
@@ -71,6 +88,7 @@ public class UserManager {
 
     // Register a new Admin
     public Admin registerAdmin(
+            int currentUserId,
             int nationalID,
             String firstName,
             String lastName,
@@ -78,6 +96,11 @@ public class UserManager {
             int age,
             String email,
             String rawPassword) {
+
+        if (!isAdmin(currentUserId)) {
+            throw new SecurityException(
+                    "Only Admin can register Admins");
+        }
 
         Admin admin = Admin.createForRegistration(
                 nationalID,
@@ -119,9 +142,21 @@ public class UserManager {
     }
 
     // Delete a user by ID
-    public boolean deleteUser(int userId) {
+    public boolean deleteUser(
+            int currentUserId,
+            int userId) {
+
+        if (!isAdmin(currentUserId)) {
+            throw new SecurityException(
+                    "Only Admin can delete users");
+        }
 
         if (userId <= 0) {
+            return false;
+        }
+
+        // Prevent Admin from deleting own account
+        if (currentUserId == userId) {
             return false;
         }
 

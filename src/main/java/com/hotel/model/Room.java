@@ -76,7 +76,7 @@ public abstract class Room {
         }
     }
 
-    int getMaxGuests() {
+    public int getMaxGuests() {
         return maxGuests;
     }
 
@@ -93,4 +93,10 @@ public abstract class Room {
             this.status = newStatus;
         }
     }
+    public RoomStatus getStatus() {
+        return status;
+    }
+
+
+
 }

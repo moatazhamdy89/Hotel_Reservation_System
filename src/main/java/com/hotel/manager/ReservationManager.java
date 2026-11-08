@@ -1,7 +1,7 @@
-
 package com.hotel.manager;
 
 import com.hotel.enums.ReservationStatus;
+import com.hotel.enums.RoomStatus;
 import com.hotel.model.Reservation;
 import com.hotel.model.Room;
 import com.hotel.repository.HibernateRepository;
@@ -113,6 +113,7 @@ public class ReservationManager {
         }
 
         if (checkInDate == null || checkOutDate == null
+                || checkInDate.isBefore(LocalDate.now())
                 || !checkOutDate.isAfter(checkInDate)) {
             throw new IllegalArgumentException(
                     "Invalid reservation dates");
@@ -123,25 +124,43 @@ public class ReservationManager {
                 room.getRoomId()
         );
 
-        if (savedRoom == null || !savedRoom.isAvailable()) {
+        if (savedRoom == null) {
             return false;
         }
 
+        // Room status rules
+        RoomStatus status = savedRoom.getStatus();
+
+        // Maintenance rooms cannot be booked
+        if (status == RoomStatus.UNDER_MAINTAINANCE) {
+            return false;
+        }
+
+        // Same-day check-in requires a ready room
+        if (checkInDate.equals(LocalDate.now())
+                && status != RoomStatus.AVAILABLE) {
+            return false;
+        }
+
+        // Check for overlapping reservations
         List<Reservation> reservations =
                 repository.findAll(Reservation.class);
 
         for (Reservation existing : reservations) {
 
+            // Cancelled reservations do not block availability
             if (existing.getStatus()
                     == ReservationStatus.CANCELLED) {
                 continue;
             }
 
+            // Ignore reservations for other rooms
             if (existing.getRoom().getRoomId()
-                    != room.getRoomId()) {
+                    != savedRoom.getRoomId()) {
                 continue;
             }
 
+            // Date ranges overlap
             boolean overlaps =
                     existing.getCheckInDate().isBefore(checkOutDate)
                             && existing.getCheckOutDate().isAfter(checkInDate);

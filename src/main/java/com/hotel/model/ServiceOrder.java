@@ -18,7 +18,7 @@ public class ServiceOrder {
     @JoinColumn(name = "reservation_id", unique = true)
     private Reservation reservation;
 
-    @ManyToMany
+    @OneToMany
     @JoinTable(
             name = "service_order_items",
             joinColumns = @JoinColumn(name = "order_id"),

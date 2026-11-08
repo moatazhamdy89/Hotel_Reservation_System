@@ -32,7 +32,7 @@ public class SuiteRoom extends Room {
         super(roomId, roomNumber, floorNumber, basePrice,
                 status, viewType, description, 4);
 
-        this.numberOfRooms = numberOfRooms > 0 ? numberOfRooms : 2;
+        this.numberOfRooms = numberOfRooms > 0 && numberOfRooms < 4 ? numberOfRooms : 2;
         this.hasLivingRoom = hasLivingRoom;
         this.hasDiningArea = hasDiningArea;
     }
