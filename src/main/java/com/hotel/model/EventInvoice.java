@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 public class EventInvoice extends Invoice {
 
     // Linked to one event booking; no setter to prevent changing it
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "event_booking_id", nullable = false, unique = true)
     private EventBooking eventBooking;
 
@@ -32,9 +32,7 @@ public class EventInvoice extends Invoice {
                             + eventBooking.getStatus());
 
         this.eventBooking = eventBooking;
-
-        // Calculate and freeze the total when the invoice is issued
-        lockTotal();
+        this.totalAmount=calculateTotal();
     }
 
     @Override

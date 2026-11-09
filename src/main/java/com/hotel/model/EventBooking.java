@@ -16,7 +16,7 @@ public class EventBooking {
     @Column(name = "booking_id")
     private int bookingId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "hall_id", nullable = false)
     private EventHall hall;
 

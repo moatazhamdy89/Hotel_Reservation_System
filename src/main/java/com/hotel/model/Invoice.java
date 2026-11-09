@@ -26,9 +26,6 @@ public abstract class Invoice {
     @Column(name = "total_amount", precision = 10, scale = 2)
     protected double totalAmount;            // frozen when issued
 
-    @Transient
-    private boolean totalLocked = false;
-
     // Used when creating a new invoice
     protected Invoice() {
         this.invoiceId = 0;
@@ -36,21 +33,7 @@ public abstract class Invoice {
         this.paymentMethod = null;
     }
 
-    // Calculates and freezes the invoice total once
-    protected final void lockTotal() {
-        if (totalLocked)
-            throw new IllegalStateException(
-                    "Total of invoice is already fixed");
 
-        double computed = calculateTotal();
-
-        if (!Double.isFinite(computed) || computed < 0)
-            throw new IllegalStateException(
-                    "Calculated total must be finite and non-negative");
-
-        this.totalAmount = round2(computed);
-        this.totalLocked = true;
-    }
 
     // Checks whether an ID has been assigned.
     // This does NOT guarantee that the transaction was committed.

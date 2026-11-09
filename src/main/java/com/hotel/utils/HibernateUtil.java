@@ -31,6 +31,7 @@ public class HibernateUtil {
                 .addAnnotatedClass(EventBooking.class)
                 .addAnnotatedClass(Service.class)
                 .addAnnotatedClass(ServiceOrder.class)
+                .addAnnotatedClass(ServiceOrderItem.class)
 
                 .addAnnotatedClass(Room.class)
                 .addAnnotatedClass(SingleRoom.class)
@@ -57,7 +58,7 @@ public class HibernateUtil {
 
                 .setProperty(
                         "hibernate.connection.url",
-                        "jdbc:mysql://10.29.214.187:3306/hotel_reservation_system")
+                        "jdbc:mysql://localhost:3306/hotel_reservation_system")
 
                 .setProperty(
                         "hibernate.connection.username",

@@ -31,7 +31,7 @@ public class Reservation {
     @Column(name = "cancellation_date")
     private LocalDate cancellationDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "accommodation_type", nullable = false)
     private Accommodation accommodation;
 
@@ -46,11 +46,11 @@ public class Reservation {
     @Column(name = "status")
     private ReservationStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "guest_id", nullable = false)
     private Guest guest;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
@@ -175,10 +175,12 @@ public class Reservation {
         confirmReservation();
     }
 
+
     public void cancel() {
-        if (getStatus() == ReservationStatus.CANCELLED) {
+        if (status != ReservationStatus.PENDING
+                && status != ReservationStatus.CONFIRMED) {
             throw new IllegalStateException(
-                    "Reservation is already cancelled");
+                    "Only pending or confirmed reservations can be cancelled");
         }
 
         this.status = ReservationStatus.CANCELLED;
@@ -189,6 +191,44 @@ public class Reservation {
     public boolean isSaved() {
         return reservationId > 0;
     }
+
+
+
+    // Marks a confirmed reservation as checked in
+    public void checkIn() {
+        if (status != ReservationStatus.CONFIRMED)
+            throw new IllegalStateException(
+                    "Only confirmed reservations can check in");
+
+        if (!depositPaid)
+            throw new IllegalStateException(
+                    "Deposit must be paid before check-in");
+
+        if (!LocalDate.now().equals(checkInDate))
+            throw new IllegalStateException(
+                    "Check-in is only allowed on the scheduled date");
+
+        status = ReservationStatus.CHECKED_IN;
+    }
+
+
+    // Allows check-out during the reservation period
+    public void checkOut() {
+        if (status != ReservationStatus.CHECKED_IN)
+            throw new IllegalStateException(
+                    "Only checked-in reservations can check out");
+
+        LocalDate today = LocalDate.now();
+
+        if (today.isBefore(checkInDate)
+                || today.isAfter(checkOutDate))
+            throw new IllegalStateException(
+                    "Check-out must be within the reservation period");
+
+        status = ReservationStatus.CHECKED_OUT;
+    }
+
+
 
     public boolean isDepositPaid() { return depositPaid; }
     public int getReservationId() { return reservationId; }

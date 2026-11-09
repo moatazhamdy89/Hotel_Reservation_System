@@ -68,14 +68,14 @@ public class ReservationManager {
     }
 
     // Cancel an existing reservation
+
     public boolean cancelReservation(int reservationId) {
 
         Reservation reservation =
                 findReservationById(reservationId);
 
         if (reservation == null
-                || reservation.getStatus()
-                == ReservationStatus.CANCELLED) {
+                || reservation.getStatus() == ReservationStatus.CANCELLED) {
             return false;
         }
 
@@ -84,6 +84,7 @@ public class ReservationManager {
 
         return true;
     }
+
 
     // Record deposit payment and confirm reservation
     public Reservation payDeposit(int reservationId) {

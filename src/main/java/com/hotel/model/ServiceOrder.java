@@ -18,13 +18,13 @@ public class ServiceOrder {
     @JoinColumn(name = "reservation_id", unique = true)
     private Reservation reservation;
 
-    @OneToMany
-    @JoinTable(
-            name = "service_order_items",
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "service_id")
+    @OneToMany(
+            mappedBy = "serviceOrder",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
     )
-    private List<Service> services = new ArrayList<>();
+    private List<ServiceOrderItem> items = new ArrayList<>();
 
     @Column(name = "order_time")
     private LocalDateTime orderTime;
@@ -34,11 +34,64 @@ public class ServiceOrder {
     }
 
     public void addService(Service service) {
-        this.services.add(service);
+        addService(service, 1);
+    }
+
+    public void addService(Service service, int quantity) {
+
+        if (service == null) {
+            throw new IllegalArgumentException("Service cannot be null");
+        }
+
+        if (quantity <= 0) {
+            throw new IllegalArgumentException(
+                    "Quantity must be greater than 0"
+            );
+        }
+
+        for (ServiceOrderItem item : items) {
+            if (item.getService().getServiceId()
+                    == service.getServiceId()) {
+
+                item.setQuantity(item.getQuantity() + quantity);
+                return;
+            }
+        }
+
+        ServiceOrderItem item =
+                new ServiceOrderItem(this, service, quantity);
+
+        items.add(item);
     }
 
     public void removeService(Service service) {
-        this.services.remove(service);
+
+        if (service == null) {
+            return;
+        }
+
+        items.removeIf(item ->
+                item.getService().getServiceId()
+                        == service.getServiceId()
+        );
+    }
+
+
+
+    public int getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
+    }
+
+    public Reservation getReservation() {
+        return reservation;
+    }
+
+    public void setReservation(Reservation reservation) {
+        this.reservation = reservation;
     }
 
     public LocalDateTime getOrderTime() {
@@ -49,27 +102,30 @@ public class ServiceOrder {
         this.orderTime = orderTime;
     }
 
-    public void setServices(List<Service> services) {
-        this.services = services;
+    public List<ServiceOrderItem> getItems() {
+        return items;
     }
 
-    public void setReservation(Reservation reservation) {
-        this.reservation = reservation;
-    }
+    public void setItems(List<ServiceOrderItem> items) {
 
-    public int getOrderId() {
-        return orderId;
-    }
+        List<ServiceOrderItem> newItems =
+                items == null ? new ArrayList<>() : new ArrayList<>(items);
 
-    public void setOrderId(int orderId) {
-        this.orderId = orderId;
+        this.items.clear();
+
+        for (ServiceOrderItem item : newItems) {
+            item.setServiceOrder(this);
+            this.items.add(item);
+        }
     }
 
     public List<Service> getServices() {
-        return services;
-    }
+        List<Service> services = new ArrayList<>();
 
-    public Reservation getReservation() {
-        return reservation;
+        for (ServiceOrderItem item : items) {
+            services.add(item.getService());
+        }
+
+        return services;
     }
 }

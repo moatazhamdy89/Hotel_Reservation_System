@@ -60,70 +60,117 @@ public class DashboardManager {
     }
 
     // Scheduled check-ins on report date
+
     public long calculateCheckInsCount() {
 
-        return reservationManager.findAllReservations()
-                .stream()
-                .filter(r -> r.getStatus()
-                        == ReservationStatus.CONFIRMED)
-                .filter(r -> reportDate.equals(
-                        r.getCheckInDate()))
-                .count();
+        List<Reservation> reservations =
+                reservationManager.findAllReservations();
+
+        long count = 0;
+
+        for (Reservation reservation : reservations) {
+
+            ReservationStatus status = reservation.getStatus();
+
+            if (status == ReservationStatus.PENDING
+                    || status == ReservationStatus.CANCELLED) {
+                continue;
+            }
+
+            if (reportDate.equals(reservation.getCheckInDate())) {
+                count++;
+            }
+        }
+
+        return count;
     }
+
 
     // Scheduled check-outs on report date
+
     public long calculateCheckOutsCount() {
 
-        return reservationManager.findAllReservations()
-                .stream()
-                .filter(r -> r.getStatus()
-                        == ReservationStatus.CONFIRMED)
-                .filter(r -> reportDate.equals(
-                        r.getCheckOutDate()))
-                .count();
+        List<Reservation> reservations =
+                reservationManager.findAllReservations();
+
+        long count = 0;
+
+        for (Reservation reservation : reservations) {
+
+            ReservationStatus status = reservation.getStatus();
+
+            if (status == ReservationStatus.PENDING
+                    || status == ReservationStatus.CANCELLED) {
+                continue;
+            }
+
+            if (reportDate.equals(reservation.getCheckOutDate())) {
+                count++;
+            }
+        }
+
+        return count;
     }
+
 
     // Reservations created on report date
+
     public long calculateNewBookingsCount() {
 
-        return reservationManager.findAllReservations()
-                .stream()
-                .filter(r -> reportDate.equals(
-                        r.getBookingDate()))
-                .count();
+        List<Reservation> reservations =
+                reservationManager.findAllReservations();
+
+        long count = 0;
+
+        for (Reservation reservation : reservations) {
+            if (reportDate.equals(reservation.getBookingDate())) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
-    // Reservations cancelled on report date
     public long calculateCancellationsCount() {
 
-        return reservationManager.findAllReservations()
-                .stream()
-                .filter(r -> r.getStatus()
-                        == ReservationStatus.CANCELLED)
-                .filter(r -> reportDate.equals(
-                        r.getCancellationDate()))
-                .count();
+        List<Reservation> reservations =
+                reservationManager.findAllReservations();
+
+        long count = 0;
+
+        for (Reservation reservation : reservations) {
+            if (reservation.getStatus() == ReservationStatus.CANCELLED
+                    && reportDate.equals(reservation.getCancellationDate())) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
-    // All reservations stored in the database
+
+
+    // Count all reservations
     public int getTotalReservations() {
-
-        return reservationManager
-                .findAllReservations()
-                .size();
+        return reservationManager.findAllReservations().size();
     }
 
-    // Total amount of paid invoices
+
     public double calculateTotalRevenue() {
 
-        double total = invoiceManager.findAllInvoices()
-                .stream()
-                .filter(Invoice::isPaid)
-                .mapToDouble(Invoice::getTotalAmount)
-                .sum();
+        List<Invoice> invoices = invoiceManager.findAllInvoices();
+
+        double total = 0;
+
+        for (Invoice invoice : invoices) {
+            if (invoice.isPaid()) {
+                total += invoice.getTotalAmount();
+            }
+        }
 
         return Math.round(total * 100.0) / 100.0;
     }
+
 
     // Show projected room availability for 7 days
     public void displayWeeklyAvailability() {

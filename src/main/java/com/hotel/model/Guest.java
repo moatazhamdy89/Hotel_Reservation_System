@@ -165,6 +165,6 @@ public class Guest extends User {
 
     private static boolean isValidPhone(String p) {
         return p != null
-                && p.trim().matches("^\\+?[0-9]{8,15}$");
+                && p.trim().matches("^\\+?[0-9]{11}$");
     }
 }

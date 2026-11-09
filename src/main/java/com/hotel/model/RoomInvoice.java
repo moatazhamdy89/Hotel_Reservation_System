@@ -11,11 +11,11 @@ import org.hibernate.type.SqlTypes;
 @PrimaryKeyJoinColumn(name = "invoice_id")
 public class RoomInvoice extends Invoice {
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "reservation_id", nullable = false, unique = true)
     private Reservation reservation;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "service_order_id", unique = true)
     private ServiceOrder serviceOrder;
 
@@ -37,10 +37,13 @@ public class RoomInvoice extends Invoice {
                     "Reservation is required");
         }
 
-        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+
+        if (reservation.getStatus() != ReservationStatus.CHECKED_IN
+                && reservation.getStatus() != ReservationStatus.CHECKED_OUT) {
             throw new IllegalArgumentException(
-                    "Only a CONFIRMED reservation can have a room invoice");
+                    "Room invoice requires a checked-in or checked-out reservation");
         }
+
 
         if (!reservation.isDepositPaid()) {
             throw new IllegalArgumentException(
@@ -69,8 +72,7 @@ public class RoomInvoice extends Invoice {
 
         this.reservation = reservation;
         this.serviceOrder = serviceOrder;
-
-        lockTotal();
+        this.totalAmount=calculateTotal();
     }
 
     @Override
@@ -91,14 +93,16 @@ public class RoomInvoice extends Invoice {
     }
 
     public double calculateServicesCost() {
+
         if (serviceOrder == null) {
             return 0.0;
         }
 
         double total = 0.0;
 
-        for (Service service : serviceOrder.getServices()) {
-            total += service.getPrice();
+        for (ServiceOrderItem item : serviceOrder.getItems()) {
+            total += item.getService().getPrice()
+                    * item.getQuantity();
         }
 
         return round2(total);
