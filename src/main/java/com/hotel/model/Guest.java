@@ -4,6 +4,7 @@ import com.hotel.utils.PasswordHasher;
 import com.hotel.utils.Validation;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -154,9 +155,11 @@ public class Guest extends User {
 
         System.out.println(
                 "Discount: "
-                        + (int) (
-                        loyaltyProgram.calculateDiscount() * 100
-                ) + "%");
+                        + loyaltyProgram.calculateDiscount()
+                        .multiply(new BigDecimal("100"))
+                        .intValue()
+                        + "%"
+        );
     }
 
     private static boolean isBlank(String s) {

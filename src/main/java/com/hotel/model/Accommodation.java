@@ -2,8 +2,8 @@ package com.hotel.model;
 
 import com.hotel.enums.AccommodationType;
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "accommodations")
@@ -12,18 +12,21 @@ public class Accommodation {
     @Id
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private  AccommodationType type;   // final: the type is the primary key, so it never changes
+    private AccommodationType type;
 
-    @JdbcTypeCode(SqlTypes.DECIMAL)
     @Column(name = "price_per_night", precision = 10, scale = 2)
-    private double pricePerNight;
+    private BigDecimal pricePerNight;
 
-    protected Accommodation(){}
-    public Accommodation(AccommodationType type, double pricePerNight) {
+    protected Accommodation() {
+    }
+
+    public Accommodation(AccommodationType type, BigDecimal pricePerNight) {
         if (type == null) {
             throw new IllegalArgumentException("Accommodation type is required");
         }
+
         validatePrice(pricePerNight);
+
         this.type = type;
         this.pricePerNight = pricePerNight;
     }
@@ -32,17 +35,17 @@ public class Accommodation {
         return type;
     }
 
-    public double getPricePerNight() {
+    public BigDecimal getPricePerNight() {
         return pricePerNight;
     }
 
-    public void setPricePerNight(double pricePerNight) {
+    public void setPricePerNight(BigDecimal pricePerNight) {
         validatePrice(pricePerNight);
         this.pricePerNight = pricePerNight;
     }
 
-    public static void validatePrice(double price) {
-        if (!Double.isFinite(price) || price < 0) { // because Double.isInFinite() can't catch NAN.
+    public static void validatePrice(BigDecimal price) {
+        if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Invalid Price");
         }
     }

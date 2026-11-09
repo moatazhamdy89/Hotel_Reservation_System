@@ -4,8 +4,7 @@ import com.hotel.enums.RoomStatus;
 import com.hotel.enums.ViewType;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "rooms")
@@ -22,9 +21,8 @@ public abstract class Room {
     @Column(name = "floor_number")
     protected int floorNumber;
 
-    @JdbcTypeCode(SqlTypes.DECIMAL)
     @Column(name = "base_price", precision = 10, scale = 2)
-    protected double basePrice;
+    protected BigDecimal basePrice;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -45,13 +43,17 @@ public abstract class Room {
     }
 
     public Room(int roomId, int roomNumber, int floorNumber,
-                double basePrice, RoomStatus status, ViewType viewType,
+                BigDecimal basePrice, RoomStatus status, ViewType viewType,
                 String description, int maxGuests) {
 
         this.roomId = roomId;
         this.roomNumber = roomNumber;
         this.floorNumber = floorNumber;
-        this.basePrice = basePrice > 0 ? basePrice : 100.0;
+
+        this.basePrice = (basePrice != null && basePrice.compareTo(BigDecimal.ZERO) > 0)
+                ? basePrice
+                : new BigDecimal("100.00");
+
         this.status = status != null ? status : RoomStatus.AVAILABLE;
         this.viewType = viewType;
         this.description = description;
@@ -66,12 +68,12 @@ public abstract class Room {
         return roomNumber;
     }
 
-    public double getBasePrice() {
+    public BigDecimal getBasePrice() {
         return basePrice;
     }
 
-    public void setBasePrice(double newPrice) {
-        if (newPrice > 0) {
+    public void setBasePrice(BigDecimal newPrice) {
+        if (newPrice != null && newPrice.compareTo(BigDecimal.ZERO) > 0) {
             this.basePrice = newPrice;
         }
     }
@@ -93,10 +95,8 @@ public abstract class Room {
             this.status = newStatus;
         }
     }
+
     public RoomStatus getStatus() {
         return status;
     }
-
-
-
 }

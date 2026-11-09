@@ -1,4 +1,3 @@
-
 package com.hotel.manager;
 
 import com.hotel.enums.ReservationStatus;
@@ -6,6 +5,8 @@ import com.hotel.model.Invoice;
 import com.hotel.model.Reservation;
 import com.hotel.model.Room;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -85,7 +86,6 @@ public class DashboardManager {
         return count;
     }
 
-
     // Scheduled check-outs on report date
 
     public long calculateCheckOutsCount() {
@@ -111,7 +111,6 @@ public class DashboardManager {
 
         return count;
     }
-
 
     // Reservations created on report date
 
@@ -148,31 +147,31 @@ public class DashboardManager {
         return count;
     }
 
-
-
     // Count all reservations
+
     public int getTotalReservations() {
         return reservationManager.findAllReservations().size();
     }
 
+    // Calculate total revenue
 
-    public double calculateTotalRevenue() {
+    public BigDecimal calculateTotalRevenue() {
 
         List<Invoice> invoices = invoiceManager.findAllInvoices();
 
-        double total = 0;
+        BigDecimal total = BigDecimal.ZERO;
 
         for (Invoice invoice : invoices) {
             if (invoice.isPaid()) {
-                total += invoice.getTotalAmount();
+                total = total.add(invoice.getTotalAmount());
             }
         }
 
-        return Math.round(total * 100.0) / 100.0;
+        return total.setScale(2, RoundingMode.HALF_UP);
     }
 
-
     // Show projected room availability for 7 days
+
     public void displayWeeklyAvailability() {
 
         List<Room> rooms =
@@ -230,6 +229,7 @@ public class DashboardManager {
     }
 
     // Display complete dashboard
+
     public void displayDashboard() {
 
         System.out.println(

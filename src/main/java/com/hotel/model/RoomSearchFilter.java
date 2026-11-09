@@ -2,19 +2,21 @@ package com.hotel.model;
 
 import com.hotel.enums.ViewType;
 
+import java.math.BigDecimal;
+
 public class RoomSearchFilter {
 
     private final Class<? extends Room> desiredRoomType;
     private final ViewType desiredView;
-    private final double minPrice;
-    private final double maxPrice;
+    private final BigDecimal minPrice;
+    private final BigDecimal maxPrice;
     private final int numberOfGuests;
 
     public RoomSearchFilter(
             Class<? extends Room> desiredRoomType,
             ViewType desiredView,
-            double minPrice,
-            double maxPrice,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
             int numberOfGuests) {
 
         if (desiredRoomType != SingleRoom.class &&
@@ -30,10 +32,9 @@ public class RoomSearchFilter {
                     "Number of guests must be positive");
         }
 
-        if (!Double.isFinite(minPrice) ||
-                !Double.isFinite(maxPrice) ||
-                minPrice < 0 ||
-                maxPrice < minPrice) {
+        if (minPrice == null || maxPrice == null ||
+                minPrice.compareTo(BigDecimal.ZERO) < 0 ||
+                maxPrice.compareTo(minPrice) < 0) {
             throw new IllegalArgumentException(
                     "Invalid price range");
         }
@@ -52,15 +53,15 @@ public class RoomSearchFilter {
         }
 
         boolean matchesType =
-                desiredRoomType.isInstance(room); // check it is from class room or anything extends from room or not
+                desiredRoomType.isInstance(room);
 
         boolean matchesView =
                 desiredView == null ||
                         room.getViewType() == desiredView;
 
         boolean matchesPrice =
-                room.getBasePrice() >= minPrice &&
-                        room.getBasePrice() <= maxPrice;
+                room.getBasePrice().compareTo(minPrice) >= 0 &&
+                        room.getBasePrice().compareTo(maxPrice) <= 0;
 
         boolean matchesCapacity =
                 room.getMaxGuests() >= numberOfGuests;
@@ -79,11 +80,11 @@ public class RoomSearchFilter {
         return desiredView;
     }
 
-    public double getMinPrice() {
+    public BigDecimal getMinPrice() {
         return minPrice;
     }
 
-    public double getMaxPrice() {
+    public BigDecimal getMaxPrice() {
         return maxPrice;
     }
 

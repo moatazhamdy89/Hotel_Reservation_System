@@ -2,8 +2,9 @@ package com.hotel.model;
 
 import com.hotel.enums.PaymentMethod;
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @Table(name = "invoices")
@@ -13,27 +14,25 @@ public abstract class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "invoice_id")
-    protected int invoiceId;                 // 0 = no ID assigned yet
+    protected int invoiceId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
-    protected PaymentMethod paymentMethod;   // null until paid
+    protected PaymentMethod paymentMethod;
 
     @Column(name = "is_paid")
     protected boolean isPaid;
 
-    @JdbcTypeCode(SqlTypes.DECIMAL)
     @Column(name = "total_amount", precision = 10, scale = 2)
-    protected double totalAmount;            // frozen when issued
+    protected BigDecimal totalAmount;
 
     // Used when creating a new invoice
     protected Invoice() {
         this.invoiceId = 0;
         this.isPaid = false;
         this.paymentMethod = null;
+        this.totalAmount = BigDecimal.ZERO;
     }
-
-
 
     // Checks whether an ID has been assigned.
     // This does NOT guarantee that the transaction was committed.
@@ -42,10 +41,10 @@ public abstract class Invoice {
     }
 
     // Each invoice subtype calculates its own total
-    public abstract double calculateTotal();
+    public abstract BigDecimal calculateTotal();
 
     // Each invoice subtype calculates its remaining balance
-    public abstract double getRemainingAmount();
+    public abstract BigDecimal getRemainingAmount();
 
     public void pay(PaymentMethod method) {
         if (method == null)
@@ -71,10 +70,13 @@ public abstract class Invoice {
                         : "(no ID assigned yet)"));
 
         System.out.println("Total: " +
-                String.format("%.2f", totalAmount) + " EGP");
+                totalAmount.setScale(2, RoundingMode.HALF_UP)
+                        .toPlainString() + " EGP");
 
         System.out.println("Remaining: " +
-                String.format("%.2f", getRemainingAmount()) + " EGP");
+                getRemainingAmount()
+                        .setScale(2, RoundingMode.HALF_UP)
+                        .toPlainString() + " EGP");
 
         System.out.println("Status: " +
                 (isPaid
@@ -82,8 +84,8 @@ public abstract class Invoice {
                         : "UNPAID"));
     }
 
-    protected static double round2(double amount) {
-        return Math.round(amount * 100.0) / 100.0;
+    protected static BigDecimal round2(BigDecimal amount) {
+        return amount.setScale(2, RoundingMode.HALF_UP);
     }
 
     public boolean isPaid() {
@@ -98,7 +100,7 @@ public abstract class Invoice {
         return paymentMethod;
     }
 
-    public double getTotalAmount() {
+    public BigDecimal getTotalAmount() {
         return totalAmount;
     }
 }

@@ -5,6 +5,7 @@ import com.hotel.model.RoomSearchFilter;
 import com.hotel.enums.RoomStatus;
 import com.hotel.repository.HibernateRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -51,9 +52,10 @@ public class RoomManager {
     }
 
     // Update room price
-    public Room updateRoomPrice(int roomId, double newPrice) {
+    public Room updateRoomPrice(int roomId, BigDecimal newPrice) {
 
-        if (!Double.isFinite(newPrice) || newPrice <= 0) {
+        if (newPrice == null
+                || newPrice.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException(
                     "Price must be positive and finite");
         }
@@ -130,23 +132,34 @@ public class RoomManager {
                 continue;
             }
 
+            BigDecimal roomPrice = room.getBasePrice();
+
+            // Skip rooms without a valid price
+            if (roomPrice == null) {
+                continue;
+            }
+
             // 3. Select the first matching room
             if (selectedRoom == null) {
                 selectedRoom = room;
             }
 
             // 4. Select a cheaper room if found
-            else if (room.getBasePrice()
-                    < selectedRoom.getBasePrice()) {
-                selectedRoom = room;
-            }
+            else {
+                BigDecimal selectedPrice =
+                        selectedRoom.getBasePrice();
 
-            // 5. If prices are equal, select smaller ID
-            else if (room.getBasePrice()
-                    == selectedRoom.getBasePrice()
-                    && room.getRoomId()
-                    < selectedRoom.getRoomId()) {
-                selectedRoom = room;
+                if (selectedPrice == null
+                        || roomPrice.compareTo(selectedPrice) < 0) {
+                    selectedRoom = room;
+                }
+
+                // 5. If prices are equal, select smaller ID
+                else if (roomPrice.compareTo(selectedPrice) == 0
+                        && room.getRoomId()
+                        < selectedRoom.getRoomId()) {
+                    selectedRoom = room;
+                }
             }
         }
 

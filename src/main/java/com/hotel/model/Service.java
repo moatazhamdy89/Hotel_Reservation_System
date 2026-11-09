@@ -1,9 +1,7 @@
 package com.hotel.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.DayOfWeek;
@@ -20,13 +18,11 @@ public class Service {
     @Column(name = "service_name", nullable = false, length = 255)
     private String serviceName;
 
-    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "description", columnDefinition = "text")
     private String description;
 
-    @JdbcTypeCode(SqlTypes.DECIMAL)
     @Column(name = "price", precision = 10, scale = 2)
-    private double price;
+    private BigDecimal price;
 
     @Column(name = "is_available")
     private boolean isAvailable;
@@ -44,7 +40,7 @@ public class Service {
     public Service(
             String serviceName,
             String description,
-            double price,
+            BigDecimal price,
             boolean isAvailable,
             LocalDate serviceDate,
             LocalTime startTime) {
@@ -111,12 +107,12 @@ public class Service {
         this.serviceName = serviceName;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
-        if (!Double.isFinite(price) || price < 0) {
+    public void setPrice(BigDecimal price) {
+        if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException(
                     "Service price must be valid and non-negative"
             );

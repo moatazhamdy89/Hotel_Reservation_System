@@ -3,8 +3,8 @@ package com.hotel.model;
 import com.hotel.enums.ReservationStatus;
 import jakarta.persistence.*;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @Table(name = "room_invoices")
@@ -19,9 +19,8 @@ public class RoomInvoice extends Invoice {
     @JoinColumn(name = "service_order_id", unique = true)
     private ServiceOrder serviceOrder;
 
-    @JdbcTypeCode(SqlTypes.DECIMAL)
     @Column(name = "discount_amount", precision = 10, scale = 2)
-    private double discountAmount;
+    private BigDecimal discountAmount;
 
     // Required by Hibernate
     protected RoomInvoice() {
@@ -72,55 +71,59 @@ public class RoomInvoice extends Invoice {
 
         this.reservation = reservation;
         this.serviceOrder = serviceOrder;
-        this.totalAmount=calculateTotal();
+        this.totalAmount = calculateTotal();
     }
 
     @Override
-    public double calculateTotal() {
-        double accommodationCost =
+    public BigDecimal calculateTotal() {
+        BigDecimal accommodationCost =
                 reservation.calculateAccommodationCost();
 
-        double discountRate = reservation.getGuest()
+        BigDecimal discountRate = reservation.getGuest()
                 .getLoyaltyProgram()
                 .calculateDiscount();
 
-        discountAmount = round2(accommodationCost * discountRate);
+        discountAmount = accommodationCost.multiply(discountRate).setScale(2, RoundingMode.HALF_UP);
 
-        return round2(
-                accommodationCost
-                        - discountAmount
-                        + calculateServicesCost());
+        BigDecimal servicesCost = calculateServicesCost();
+
+        return accommodationCost
+                .subtract(discountAmount)
+                .add(servicesCost)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
-    public double calculateServicesCost() {
+    public BigDecimal calculateServicesCost() {
 
-        if (serviceOrder == null) {
-            return 0.0;
+        if (serviceOrder == null || serviceOrder.getItems() == null) {
+            return new BigDecimal("0.00");
         }
 
-        double total = 0.0;
+        BigDecimal total = new BigDecimal("0.00");
 
         for (ServiceOrderItem item : serviceOrder.getItems()) {
-            total += item.getService().getPrice()
-                    * item.getQuantity();
+            BigDecimal itemTotal = item.getService().getPrice()
+                    .multiply(new BigDecimal(String.valueOf(item.getQuantity())));
+            total = total.add(itemTotal);
         }
 
-        return round2(total);
+        return total.setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override
-    public double getRemainingAmount() {
+    public BigDecimal getRemainingAmount() {
         if (isPaid) {
-            return 0.0;
+            return new BigDecimal("0.00");
         }
 
-        double remaining = totalAmount - reservation.getDepositAmount();
+        BigDecimal depositAmount = reservation.getDepositAmount();
+        BigDecimal remaining = totalAmount.subtract(depositAmount != null ? depositAmount : new BigDecimal("0.00"));
 
-        if (remaining < 0) {
-            return 0.0;
+        if (remaining != null && remaining.compareTo(BigDecimal.ZERO) < 0) {
+            return new BigDecimal("0.00");
         }
 
-        return round2(remaining);
+        return remaining.setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override
@@ -156,7 +159,7 @@ public class RoomInvoice extends Invoice {
         return serviceOrder;
     }
 
-    public double getDiscountAmount() {
+    public BigDecimal getDiscountAmount() {
         return discountAmount;
     }
 }

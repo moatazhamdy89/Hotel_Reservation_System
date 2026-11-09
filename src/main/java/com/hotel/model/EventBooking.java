@@ -2,9 +2,8 @@ package com.hotel.model;
 
 import com.hotel.enums.EventBookingStatus;
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,7 +15,7 @@ public class EventBooking {
     @Column(name = "booking_id")
     private int bookingId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hall_id", nullable = false)
     private EventHall hall;
 
@@ -39,9 +38,8 @@ public class EventBooking {
     @Column(name = "end_date_time")
     private LocalDateTime endDateTime;
 
-    @JdbcTypeCode(SqlTypes.DECIMAL)
     @Column(name = "deposit_amount", precision = 10, scale = 2)
-    private double depositAmount;
+    private BigDecimal depositAmount;
 
     @Column(name = "deposit_paid")
     private boolean depositPaid;
@@ -61,7 +59,7 @@ public class EventBooking {
     public EventBooking(EventHall hall, Guest guest,
                         LocalDateTime startDateTime,
                         LocalDateTime endDateTime,
-                        double depositAmount) {
+                        BigDecimal depositAmount) {
 
         validateBooking(hall, startDateTime,
                 endDateTime, depositAmount);
@@ -85,7 +83,7 @@ public class EventBooking {
                         String clientPhone, String nationalId,
                         LocalDateTime startDateTime,
                         LocalDateTime endDateTime,
-                        double depositAmount) {
+                        BigDecimal depositAmount) {
 
         validateBooking(hall, startDateTime,
                 endDateTime, depositAmount);
@@ -113,7 +111,7 @@ public class EventBooking {
             EventHall hall,
             LocalDateTime start,
             LocalDateTime end,
-            double deposit) {
+            BigDecimal deposit) {
 
         if (hall == null) {
             throw new IllegalArgumentException(
@@ -126,7 +124,8 @@ public class EventBooking {
                     "End date must be after start date");
         }
 
-        if (!Double.isFinite(deposit) || deposit < 0) {
+        if (deposit == null ||
+                deposit.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException(
                     "Invalid deposit amount");
         }
@@ -213,7 +212,7 @@ public class EventBooking {
         return endDateTime;
     }
 
-    public double getDepositAmount() {
+    public BigDecimal getDepositAmount() {
         return depositAmount;
     }
 
@@ -229,4 +228,14 @@ public class EventBooking {
         return cancellationReason;
     }
 
+    // Kept temporarily for old DAO compatibility
+    public void assignId(int bookingId) {
+
+        if (this.bookingId != 0 || bookingId <= 0) {
+            throw new IllegalStateException(
+                    "Invalid booking ID assignment");
+        }
+
+        this.bookingId = bookingId;
+    }
 }

@@ -2,9 +2,9 @@ package com.hotel.model;
 
 import com.hotel.enums.ReservationStatus;
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
@@ -12,10 +12,11 @@ import java.time.temporal.ChronoUnit;
 @Table(name = "reservations")
 public class Reservation {
 
-    private static final double depositRate = 0.20;
+    private static final BigDecimal depositRate =
+            new BigDecimal("0.20");
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto - increment
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reservation_id")
     private int reservationId;
 
@@ -35,9 +36,8 @@ public class Reservation {
     @JoinColumn(name = "accommodation_type", nullable = false)
     private Accommodation accommodation;
 
-    @JdbcTypeCode(SqlTypes.DECIMAL)
     @Column(name = "deposit_amount", precision = 10, scale = 2)
-    private double depositAmount;
+    private BigDecimal depositAmount;
 
     @Column(name = "deposit_paid")
     private boolean depositPaid;
@@ -58,6 +58,7 @@ public class Reservation {
     // Required by Hibernate
     protected Reservation() {
     }
+
 
     // NEW reservation
     public Reservation(LocalDate checkInDate, LocalDate checkOutDate,
@@ -91,65 +92,42 @@ public class Reservation {
         this.depositAmount = calculateDeposit();
     }
 
-    // Existing reservation reconstruction (legacy JDBC)
-    public Reservation(int reservationId, LocalDate checkInDate,
-                       LocalDate checkOutDate, LocalDate bookingDate,
-                       LocalDate cancellationDate,
-                       Accommodation accommodation, double depositAmount,
-                       boolean depositPaid, ReservationStatus status,
-                       Guest guest, Room room) {
-
-        if (reservationId <= 0) {
-            throw new IllegalArgumentException(
-                    "Reservation ID must be positive");
-        }
-
-        if (status == ReservationStatus.CONFIRMED && !depositPaid) {
-            throw new IllegalArgumentException(
-                    "A CONFIRMED reservation must have its deposit paid");
-        }
-
-        this.reservationId = reservationId;
-        this.checkInDate = checkInDate;
-        this.checkOutDate = checkOutDate;
-        this.bookingDate = bookingDate;
-        this.cancellationDate = cancellationDate;
-        this.accommodation = accommodation;
-        this.depositAmount = depositAmount;
-        this.depositPaid = depositPaid;
-        this.status = status;
-        this.guest = guest;
-        this.room = room;
-    }
-
     public boolean validateDates() {
         return getCheckInDate() != null
                 && getCheckOutDate() != null
                 && getCheckOutDate().isAfter(getCheckInDate());
     }
 
+
     public int calculateNights() {
         return (int) ChronoUnit.DAYS.between(
                 getCheckInDate(), getCheckOutDate());
     }
 
-    public double calculateAccommodationCost() {
+
+    public BigDecimal calculateAccommodationCost() {
+
         if (calculateNights() <= 0) {
             throw new IllegalArgumentException(
                     "Number of nights must be greater than 0");
         }
 
-        double pricePerNight =
-                accommodation.getPricePerNight() + room.getBasePrice();
+        BigDecimal pricePerNight =
+                accommodation.getPricePerNight()
+                        .add(room.getBasePrice());
 
-        return Math.round(
-                pricePerNight * calculateNights() * 100.0) / 100.0;
+        return pricePerNight
+                .multiply(BigDecimal.valueOf(calculateNights()))
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
-    public double calculateDeposit() {
-        return Math.round(
-                calculateAccommodationCost() * depositRate * 100.0) / 100.0;
+
+    public BigDecimal calculateDeposit() {
+        return calculateAccommodationCost()
+                .multiply(depositRate)
+                .setScale(2, RoundingMode.HALF_UP);
     }
+
 
     public void confirmReservation() {
         if (getStatus() != ReservationStatus.PENDING) {
@@ -164,6 +142,7 @@ public class Reservation {
 
         this.status = ReservationStatus.CONFIRMED;
     }
+
 
     public void payDeposit() {
         if (getStatus() != ReservationStatus.PENDING) {
@@ -191,7 +170,6 @@ public class Reservation {
     public boolean isSaved() {
         return reservationId > 0;
     }
-
 
 
     // Marks a confirmed reservation as checked in
@@ -229,16 +207,47 @@ public class Reservation {
     }
 
 
+    public boolean isDepositPaid() {
+        return depositPaid;
+    }
 
-    public boolean isDepositPaid() { return depositPaid; }
-    public int getReservationId() { return reservationId; }
-    public LocalDate getCheckInDate() { return checkInDate; }
-    public LocalDate getCheckOutDate() { return checkOutDate; }
-    public LocalDate getBookingDate() { return bookingDate; }
-    public LocalDate getCancellationDate() { return cancellationDate; }
-    public Accommodation getAccommodation() { return accommodation; }
-    public double getDepositAmount() { return depositAmount; }
-    public ReservationStatus getStatus() { return status; }
-    public Guest getGuest() { return guest; }
-    public Room getRoom() { return room; }
+    public int getReservationId() {
+        return reservationId;
+    }
+
+    public LocalDate getCheckInDate() {
+        return checkInDate;
+    }
+
+    public LocalDate getCheckOutDate() {
+        return checkOutDate;
+    }
+
+    public LocalDate getBookingDate() {
+        return bookingDate;
+    }
+
+    public LocalDate getCancellationDate() {
+        return cancellationDate;
+    }
+
+    public Accommodation getAccommodation() {
+        return accommodation;
+    }
+
+    public BigDecimal getDepositAmount() {
+        return depositAmount;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
+    }
+
+    public Guest getGuest() {
+        return guest;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
 }
