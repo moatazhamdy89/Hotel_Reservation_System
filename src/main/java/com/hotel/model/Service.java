@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.DayOfWeek;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "services")
@@ -35,33 +37,24 @@ public class Service {
     @Column(name = "start_time")
     private LocalTime startTime;
 
-    // NEW: Weekly recurring activity day
     @Enumerated(EnumType.STRING)
     @Column(name = "service_day")
     private DayOfWeek serviceDay;
 
-    // Required by Hibernate
-    protected Service() {
-    }
+    protected Service() {}
 
-    public Service(
-            String serviceName,
-            String description,
-            BigDecimal price,
-            boolean isAvailable,
-            LocalDate serviceDate,
-            LocalTime startTime) {
-
-        this.setServiceName(serviceName);
+    public Service(String serviceName, String description, BigDecimal price,
+                   boolean isAvailable, LocalDate serviceDate, LocalTime startTime) {
+        setServiceName(serviceName);
         this.description = description;
-        this.setPrice(price);
+        setPrice(price);
         this.isAvailable = isAvailable;
         this.serviceDate = serviceDate;
         this.startTime = startTime;
     }
 
     public void toggleAvailability() {
-        this.isAvailable = !this.isAvailable;
+        isAvailable = !isAvailable;
     }
 
     public String getServiceDetails() {
@@ -79,11 +72,7 @@ public class Service {
     }
 
     public DayOfWeek getDayOfWeek() {
-        if (serviceDate != null) {
-            return serviceDate.getDayOfWeek();
-        } else {
-            return null;
-        }
+        return serviceDate == null ? null : serviceDate.getDayOfWeek();
     }
 
     public LocalTime getStartTime() {
@@ -119,12 +108,8 @@ public class Service {
     }
 
     public void setPrice(BigDecimal price) {
-        if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException(
-                    "Service price must be valid and non-negative"
-            );
-        }
-
+        if (price == null || price.compareTo(BigDecimal.ZERO) < 0)
+            throw new IllegalArgumentException("Service price must be valid and non-negative");
         this.price = price;
     }
 
@@ -144,35 +129,45 @@ public class Service {
         return serviceId;
     }
 
-    // ==========================================
-    // NEW: WEEKLY ACTIVITY SCHEDULING
-    // ==========================================
-
     public DayOfWeek getServiceDay() {
         return serviceDay;
     }
 
     public void setServiceDay(DayOfWeek serviceDay) {
-        if (serviceDay == null) {
-            throw new IllegalArgumentException(
-                    "Service day cannot be null"
-            );
-        }
-
+        if (serviceDay == null)
+            throw new IllegalArgumentException("Service day cannot be null");
         this.serviceDay = serviceDay;
     }
 
-    // Returns the next activity date from a given date
     public LocalDate getNextServiceDate(LocalDate fromDate) {
+        if (fromDate == null || serviceDay == null)
+            throw new IllegalArgumentException("Date and service day are required");
+        return fromDate.with(TemporalAdjusters.nextOrSame(serviceDay));
+    }
 
-        if (fromDate == null || serviceDay == null) {
-            throw new IllegalArgumentException(
-                    "Date and service day are required"
-            );
-        }
+    public BigDecimal calculateTotal(int quantity) {
+        if (quantity <= 0)
+            throw new IllegalArgumentException("Quantity must be greater than zero");
+        return price.multiply(BigDecimal.valueOf(quantity));
+    }
 
-        return fromDate.with(
-                TemporalAdjusters.nextOrSame(serviceDay)
-        );
+    public List<LocalDate> getAvailableDates(Reservation reservation) {
+        List<LocalDate> dates = new ArrayList<>();
+        if (reservation == null || !isAvailable || serviceDay == null) return dates;
+
+        LocalDate start = reservation.getCheckInDate();
+        LocalDate end = reservation.getCheckOutDate();
+        if (start == null || end == null) return dates;
+        if (start.isBefore(LocalDate.now())) start = LocalDate.now();
+
+        for (LocalDate date = getNextServiceDate(start);
+             date.isBefore(end); date = date.plusWeeks(1))
+            dates.add(date);
+
+        return dates;
+    }
+
+    public boolean canBookOn(Reservation reservation, LocalDate date) {
+        return date != null && getAvailableDates(reservation).contains(date);
     }
 }

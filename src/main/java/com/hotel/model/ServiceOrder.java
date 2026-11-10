@@ -16,32 +16,22 @@ public class ServiceOrder {
     @Column(name = "order_id")
     private int orderId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "reservation_id", unique = true)
     private Reservation reservation;
 
-    @OneToMany(
-            mappedBy = "serviceOrder",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.EAGER
-    )
+    @OneToMany(mappedBy = "serviceOrder", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ServiceOrderItem> items = new ArrayList<>();
 
     @Column(name = "order_time")
     private LocalDateTime orderTime;
 
-    // Required by Hibernate
-    protected ServiceOrder() {
-    }
+    protected ServiceOrder() {}
 
     public ServiceOrder(Reservation reservation) {
-        if (reservation == null) {
-            throw new IllegalArgumentException(
-                    "Reservation cannot be null"
-            );
-        }
-
+        if (reservation == null)
+            throw new IllegalArgumentException("Reservation cannot be null");
         this.reservation = reservation;
         this.orderTime = LocalDateTime.now();
     }
@@ -51,101 +41,48 @@ public class ServiceOrder {
     }
 
     public void addService(Service service, int quantity) {
-
-        if (service == null) {
+        if (service == null)
             throw new IllegalArgumentException("Service cannot be null");
-        }
-
-        if (quantity <= 0) {
-            throw new IllegalArgumentException(
-                    "Quantity must be greater than 0"
-            );
-        }
+        if (quantity <= 0)
+            throw new IllegalArgumentException("Quantity must be greater than zero");
 
         for (ServiceOrderItem item : items) {
-            if (item.getService().getServiceId()
-                    == service.getServiceId()) {
-
+            if (item.getService().getServiceId() == service.getServiceId()) {
                 item.setQuantity(item.getQuantity() + quantity);
                 return;
             }
         }
 
-        ServiceOrderItem item =
-                new ServiceOrderItem(this, service, quantity);
-
-        items.add(item);
+        items.add(new ServiceOrderItem(this, service, quantity));
     }
 
-    // ==========================================
-    // NEW: ADD WEEKLY ACTIVITY WITH DATE
-    // ==========================================
+    public void addService(Service service, int quantity, LocalDate scheduledDate) {
+        if (service == null)
+            throw new IllegalArgumentException("Service cannot be null");
+        if (quantity <= 0)
+            throw new IllegalArgumentException("Quantity must be greater than zero");
+        if (scheduledDate == null)
+            throw new IllegalArgumentException("Scheduled date is required");
 
-    public void addService(
-            Service service,
-            int quantity,
-            LocalDate scheduledDate) {
-
-        if (service == null) {
-            throw new IllegalArgumentException(
-                    "Service cannot be null"
-            );
-        }
-
-        if (quantity <= 0) {
-            throw new IllegalArgumentException(
-                    "Quantity must be greater than zero"
-            );
-        }
-
-        if (scheduledDate == null) {
-            throw new IllegalArgumentException(
-                    "Scheduled date is required"
-            );
-        }
-
-        if (service.getServiceDay() == null
-                || scheduledDate.getDayOfWeek()
-                != service.getServiceDay()) {
-
-            throw new IllegalArgumentException(
-                    "Activity is not scheduled on this day"
-            );
-        }
+        if (!service.canBookOn(reservation, scheduledDate))
+            throw new IllegalArgumentException("Activity is unavailable on this date or outside guest stay");
 
         for (ServiceOrderItem item : items) {
-
-            if (item.getService().getServiceId()
-                    == service.getServiceId()) {
-
-                if (!scheduledDate.equals(item.getScheduledDate())) {
-                    throw new IllegalArgumentException(
-                            "This activity is already booked on another date"
-                    );
-                }
+            if (item.getService().getServiceId() == service.getServiceId()) {
+                if (!scheduledDate.equals(item.getScheduledDate()))
+                    throw new IllegalArgumentException("This activity is already booked on another date");
 
                 item.setQuantity(item.getQuantity() + quantity);
                 return;
             }
         }
 
-        ServiceOrderItem item = new ServiceOrderItem(
-                this, service, quantity, scheduledDate
-        );
-
-        items.add(item);
+        items.add(new ServiceOrderItem(this, service, quantity, scheduledDate));
     }
 
     public void removeService(Service service) {
-
-        if (service == null) {
-            return;
-        }
-
-        items.removeIf(item ->
-                item.getService().getServiceId()
-                        == service.getServiceId()
-        );
+        if (service == null) return;
+        items.removeIf(item -> item.getService().getServiceId() == service.getServiceId());
     }
 
     public int getOrderId() {
@@ -177,10 +114,7 @@ public class ServiceOrder {
     }
 
     public void setItems(List<ServiceOrderItem> items) {
-
-        List<ServiceOrderItem> newItems =
-                items == null ? new ArrayList<>() : new ArrayList<>(items);
-
+        List<ServiceOrderItem> newItems = items == null ? new ArrayList<>() : new ArrayList<>(items);
         this.items.clear();
 
         for (ServiceOrderItem item : newItems) {
@@ -191,11 +125,8 @@ public class ServiceOrder {
 
     public List<Service> getServices() {
         List<Service> services = new ArrayList<>();
-
-        for (ServiceOrderItem item : items) {
+        for (ServiceOrderItem item : items)
             services.add(item.getService());
-        }
-
         return services;
     }
 }

@@ -94,20 +94,13 @@ public class RoomInvoice extends Invoice {
     }
 
     public BigDecimal calculateServicesCost() {
+        if (serviceOrder == null) return BigDecimal.ZERO;
 
-        if (serviceOrder == null || serviceOrder.getItems() == null) {
-            return new BigDecimal("0.00");
-        }
+        BigDecimal total = BigDecimal.ZERO;
+        for (ServiceOrderItem item : serviceOrder.getItems())
+            total = total.add(item.getService().calculateTotal(item.getQuantity()));
 
-        BigDecimal total = new BigDecimal("0.00");
-
-        for (ServiceOrderItem item : serviceOrder.getItems()) {
-            BigDecimal itemTotal = item.getService().getPrice()
-                    .multiply(new BigDecimal(String.valueOf(item.getQuantity())));
-            total = total.add(itemTotal);
-        }
-
-        return total.setScale(2, RoundingMode.HALF_UP);
+        return round2(total);
     }
 
     @Override
