@@ -7,6 +7,7 @@ import com.hotel.repository.HibernateRepository;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -81,14 +82,18 @@ public class Review {
                         "Reservation not found in database");
             }
 
+            // Only checked-out guests can leave reviews
             if (savedReservation.getStatus()
-                    != ReservationStatus.CONFIRMED) {
+                    != ReservationStatus.CHECKED_OUT) {
+
                 throw new IllegalStateException(
-                        "Only a CONFIRMED reservation can be reviewed");
+                        "Only a CHECKED_OUT reservation can be reviewed");
             }
 
+            // Ensure the stay has ended
             if (savedReservation.getCheckOutDate()
                     .isAfter(LocalDate.now())) {
+
                 throw new IllegalStateException(
                         "You can review only after the stay ends");
             }
@@ -189,6 +194,54 @@ public class Review {
 
             return Optional.ofNullable(review);
         });
+    }
+
+    // NEW: Find all hotel reviews
+    public static List<Review> findAllReviews() {
+
+        HibernateRepository repository =
+                new HibernateRepository();
+
+        return repository.withTransaction(session ->
+                session.createSelectionQuery(
+                        "select r from Review r " +
+                                "join fetch r.reservation res " +
+                                "join fetch res.guest " +
+                                "order by r.date desc, r.reviewId desc",
+                        Review.class
+                ).getResultList()
+        );
+    }
+
+    // NEW: Calculate average hotel rating
+    public static double getAverageRating() {
+
+        HibernateRepository repository =
+                new HibernateRepository();
+
+        return repository.withTransaction(session -> {
+
+            Double average = session.createSelectionQuery(
+                    "select avg(r.rating) from Review r",
+                    Double.class
+            ).getSingleResult();
+
+            return average == null ? 0.0 : average;
+        });
+    }
+
+    // NEW: Count hotel reviews
+    public static long getTotalReviews() {
+
+        HibernateRepository repository =
+                new HibernateRepository();
+
+        return repository.withTransaction(session ->
+                session.createSelectionQuery(
+                        "select count(r) from Review r",
+                        Long.class
+                ).getSingleResult()
+        );
     }
 
     public void displayReview() {

@@ -58,20 +58,37 @@ public class InvoiceManager {
         return repository.update(invoice);
     }
 
-    // Pay an existing invoice
     public Invoice payInvoice(
             int invoiceId,
             PaymentMethod method) {
 
-        Invoice invoice = findInvoiceById(invoiceId);
-
-        if (invoice == null) {
+        if (invoiceId <= 0) {
             throw new IllegalArgumentException(
-                    "Invoice not found");
+                    "Invalid invoice ID");
         }
 
-        invoice.pay(method);
+        if (method == null) {
+            throw new IllegalArgumentException(
+                    "Payment method is required");
+        }
 
-        return repository.update(invoice);
+        return repository.withTransaction(session -> {
+
+            Invoice invoice = session.find(
+                    Invoice.class,
+                    invoiceId,
+                    jakarta.persistence.LockModeType.PESSIMISTIC_WRITE
+            );
+
+            if (invoice == null) {
+                throw new IllegalArgumentException(
+                        "Invoice not found");
+            }
+
+            invoice.pay(method);
+
+            // Hibernate automatically saves changes on commit
+            return invoice;
+        });
     }
 }

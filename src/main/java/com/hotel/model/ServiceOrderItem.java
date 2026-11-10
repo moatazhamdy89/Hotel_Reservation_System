@@ -1,7 +1,9 @@
+
 package com.hotel.model;
 
 import jakarta.persistence.*;
 import java.util.Objects;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "service_order_items")
@@ -20,6 +22,10 @@ public class ServiceOrderItem {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
+    // NEW: Actual date booked for the activity
+    @Column(name = "scheduled_date")
+    private LocalDate scheduledDate;
+
     public ServiceOrderItem() {
     }
 
@@ -29,6 +35,15 @@ public class ServiceOrderItem {
         this.serviceOrder = serviceOrder;
         this.service = service;
         setQuantity(quantity);
+    }
+
+    // NEW: Constructor with scheduled date
+    public ServiceOrderItem(ServiceOrder serviceOrder,
+                            Service service,
+                            int quantity,
+                            LocalDate scheduledDate) {
+        this(serviceOrder, service, quantity);
+        setScheduledDate(scheduledDate);
     }
 
     public ServiceOrder getServiceOrder() {
@@ -60,8 +75,23 @@ public class ServiceOrderItem {
         this.quantity = quantity;
     }
 
+    // ==========================================
+    // NEW: SCHEDULED DATE
+    // ==========================================
 
+    public LocalDate getScheduledDate() {
+        return scheduledDate;
+    }
 
+    public void setScheduledDate(LocalDate scheduledDate) {
+        if (scheduledDate == null) {
+            throw new IllegalArgumentException(
+                    "Scheduled date cannot be null"
+            );
+        }
+
+        this.scheduledDate = scheduledDate;
+    }
 
     // Compares two items using their order ID and service ID
     @Override
@@ -80,7 +110,6 @@ public class ServiceOrderItem {
         );
     }
 
-
     // Generates a hash code using the order ID and service ID
     @Override
     public int hashCode() {
@@ -89,5 +118,4 @@ public class ServiceOrderItem {
                 service == null ? null : service.getServiceId()
         );
     }
-
 }

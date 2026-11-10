@@ -7,6 +7,7 @@ import com.hotel.model.ServiceOrder;
 import com.hotel.model.ServiceOrderItem;
 import com.hotel.repository.HibernateRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -93,15 +94,25 @@ public class ServiceOrderManager {
         return null;
     }
 
-    // Add service with quantity
+
+    // ==========================================
+    // NEW: ADD WEEKLY ACTIVITY WITH DATE
+    // ==========================================
+
     public boolean addService(
             int orderId,
             int serviceId,
-            int quantity) {
+            int quantity,
+            LocalDate scheduledDate) {
 
         if (quantity <= 0) {
             throw new IllegalArgumentException(
                     "Quantity must be greater than zero");
+        }
+
+        if (scheduledDate == null) {
+            throw new IllegalArgumentException(
+                    "Scheduled date is required");
         }
 
         ServiceOrder order = findOrderById(orderId);
@@ -117,7 +128,44 @@ public class ServiceOrderManager {
             return false;
         }
 
-        order.addService(service, quantity);
+        if (service.getServiceDay() == null
+                || scheduledDate.getDayOfWeek()
+                != service.getServiceDay()) {
+
+            throw new IllegalArgumentException(
+                    "Activity is not scheduled on this day");
+        }
+
+        if (scheduledDate.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException(
+                    "Cannot book an activity in the past");
+        }
+
+        if (order.getReservation() == null) {
+            return false;
+        }
+
+        int reservationId =
+                order.getReservation().getReservationId();
+
+        Reservation reservation = repository.findById(
+                Reservation.class, reservationId
+        );
+
+        if (reservation == null) {
+            return false;
+        }
+
+        if (scheduledDate.isBefore(
+                reservation.getCheckInDate())
+                || !scheduledDate.isBefore(
+                reservation.getCheckOutDate())) {
+
+            throw new IllegalArgumentException(
+                    "Activity date must be within guest stay");
+        }
+
+        order.addService(service, quantity, scheduledDate);
 
         repository.update(order);
         return true;
@@ -182,7 +230,6 @@ public class ServiceOrderManager {
 
         return false;
     }
-
 
     // Update an existing order
     public ServiceOrder updateOrder(ServiceOrder order) {

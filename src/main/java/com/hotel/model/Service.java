@@ -1,3 +1,4 @@
+
 package com.hotel.model;
 
 import jakarta.persistence.*;
@@ -5,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.DayOfWeek;
+import java.time.temporal.TemporalAdjusters;
 
 @Entity
 @Table(name = "services")
@@ -32,6 +34,11 @@ public class Service {
 
     @Column(name = "start_time")
     private LocalTime startTime;
+
+    // NEW: Weekly recurring activity day
+    @Enumerated(EnumType.STRING)
+    @Column(name = "service_day")
+    private DayOfWeek serviceDay;
 
     // Required by Hibernate
     protected Service() {
@@ -135,5 +142,37 @@ public class Service {
 
     public int getServiceId() {
         return serviceId;
+    }
+
+    // ==========================================
+    // NEW: WEEKLY ACTIVITY SCHEDULING
+    // ==========================================
+
+    public DayOfWeek getServiceDay() {
+        return serviceDay;
+    }
+
+    public void setServiceDay(DayOfWeek serviceDay) {
+        if (serviceDay == null) {
+            throw new IllegalArgumentException(
+                    "Service day cannot be null"
+            );
+        }
+
+        this.serviceDay = serviceDay;
+    }
+
+    // Returns the next activity date from a given date
+    public LocalDate getNextServiceDate(LocalDate fromDate) {
+
+        if (fromDate == null || serviceDay == null) {
+            throw new IllegalArgumentException(
+                    "Date and service day are required"
+            );
+        }
+
+        return fromDate.with(
+                TemporalAdjusters.nextOrSame(serviceDay)
+        );
     }
 }

@@ -1,6 +1,8 @@
+
 package com.hotel.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,17 @@ public class ServiceOrder {
 
     // Required by Hibernate
     protected ServiceOrder() {
+    }
+
+    public ServiceOrder(Reservation reservation) {
+        if (reservation == null) {
+            throw new IllegalArgumentException(
+                    "Reservation cannot be null"
+            );
+        }
+
+        this.reservation = reservation;
+        this.orderTime = LocalDateTime.now();
     }
 
     public void addService(Service service) {
@@ -64,6 +77,65 @@ public class ServiceOrder {
         items.add(item);
     }
 
+    // ==========================================
+    // NEW: ADD WEEKLY ACTIVITY WITH DATE
+    // ==========================================
+
+    public void addService(
+            Service service,
+            int quantity,
+            LocalDate scheduledDate) {
+
+        if (service == null) {
+            throw new IllegalArgumentException(
+                    "Service cannot be null"
+            );
+        }
+
+        if (quantity <= 0) {
+            throw new IllegalArgumentException(
+                    "Quantity must be greater than zero"
+            );
+        }
+
+        if (scheduledDate == null) {
+            throw new IllegalArgumentException(
+                    "Scheduled date is required"
+            );
+        }
+
+        if (service.getServiceDay() == null
+                || scheduledDate.getDayOfWeek()
+                != service.getServiceDay()) {
+
+            throw new IllegalArgumentException(
+                    "Activity is not scheduled on this day"
+            );
+        }
+
+        for (ServiceOrderItem item : items) {
+
+            if (item.getService().getServiceId()
+                    == service.getServiceId()) {
+
+                if (!scheduledDate.equals(item.getScheduledDate())) {
+                    throw new IllegalArgumentException(
+                            "This activity is already booked on another date"
+                    );
+                }
+
+                item.setQuantity(item.getQuantity() + quantity);
+                return;
+            }
+        }
+
+        ServiceOrderItem item = new ServiceOrderItem(
+                this, service, quantity, scheduledDate
+        );
+
+        items.add(item);
+    }
+
     public void removeService(Service service) {
 
         if (service == null) {
@@ -75,8 +147,6 @@ public class ServiceOrder {
                         == service.getServiceId()
         );
     }
-
-
 
     public int getOrderId() {
         return orderId;
