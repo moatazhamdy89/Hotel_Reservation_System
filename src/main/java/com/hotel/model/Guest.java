@@ -32,7 +32,7 @@ public class Guest extends User {
     }
 
     // Constructor for creating a Guest object
-    public Guest(int nationalID, int userID,
+    public Guest(String nationalID, int userID,
                  String firstName, String lastName,
                  String gender, int age,
                  String email, String passwordHash,
@@ -52,6 +52,7 @@ public class Guest extends User {
                     "Invalid phone number");
         }
 
+
         this.nationality = nationality.trim();
         this.phone = phone.trim();
 
@@ -62,7 +63,7 @@ public class Guest extends User {
     // Validates input, hashes password and creates a Guest.
     // Does NOT save to the database.
     public static Guest createForRegistration(
-            int nationalID,
+            String nationalID,
             String firstName,
             String lastName,
             String gender,
@@ -71,6 +72,12 @@ public class Guest extends User {
             String rawPassword,
             String nationality,
             String phone) {
+
+
+        if (!isNationalId(nationalID))
+            throw new IllegalArgumentException(
+                    "Invalid National ID (must be 14 digits)\n"
+            );
 
         if (!Validation.isValidEmail(email)) {
             throw new IllegalArgumentException(
@@ -89,6 +96,15 @@ public class Guest extends User {
         if (isBlank(firstName) || isBlank(lastName)) {
             throw new IllegalArgumentException(
                     "Name cannot be empty");
+        }
+
+        if (gender == null ||
+                (!gender.equalsIgnoreCase("Male")
+                        && !gender.equalsIgnoreCase("Female"))) {
+
+            throw new IllegalArgumentException(
+                    "Gender must be Male or Female"
+            );
         }
 
         if (age <= 0) {

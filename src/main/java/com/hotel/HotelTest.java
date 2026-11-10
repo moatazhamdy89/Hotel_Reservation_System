@@ -1749,7 +1749,7 @@ public class HotelTest {
 // TEST 43: Register Guest
         try {
             authGuest = authManager.registerGuest(
-                    123456789,
+                    "123456789",
                     "Test",
                     "Guest",
                     "Female",
@@ -1890,7 +1890,7 @@ public class HotelTest {
 // TEST 49: Invalid email rejected
         try {
             Guest.createForRegistration(
-                    123456789,
+                    "123456789",
                     "Invalid",
                     "Email",
                     "Female",
@@ -1912,7 +1912,7 @@ public class HotelTest {
 // TEST 50: Weak password rejected
         try {
             Guest.createForRegistration(
-                    123456789,
+                    "123456789",
                     "Weak",
                     "Password",
                     "Female",
@@ -1937,7 +1937,7 @@ public class HotelTest {
 
             authManager.registerReceptionist(
                     guestId,
-                    123456789,
+                    "123456789",
                     "Test",
                     "Receptionist",
                     "Female",
@@ -1962,7 +1962,7 @@ public class HotelTest {
 
             authManager.registerAdmin(
                     guestId,
-                    123456789,
+                    "123456789",
                     "Test",
                     "Admin",
                     "Female",

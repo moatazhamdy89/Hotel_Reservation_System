@@ -27,7 +27,7 @@ public class UserManager {
 
     // Register a new Guest
     public Guest registerGuest(
-            int nationalID,
+            String nationalID,
             String firstName,
             String lastName,
             String gender,
@@ -48,6 +48,7 @@ public class UserManager {
                 nationality,
                 phone
         );
+        validateUniqueEmail(email);
 
         return repository.save(guest);
     }
@@ -55,7 +56,7 @@ public class UserManager {
     // Register a new Receptionist
     public Receptionist registerReceptionist(
             int currentUserId,
-            int nationalID,
+            String nationalID,
             String firstName,
             String lastName,
             String gender,
@@ -82,6 +83,7 @@ public class UserManager {
                         phone,
                         shift
                 );
+        validateUniqueEmail(email);
 
         return repository.save(receptionist);
     }
@@ -89,7 +91,7 @@ public class UserManager {
     // Register a new Admin
     public Admin registerAdmin(
             int currentUserId,
-            int nationalID,
+            String nationalID,
             String firstName,
             String lastName,
             String gender,
@@ -111,6 +113,7 @@ public class UserManager {
                 email,
                 rawPassword
         );
+        validateUniqueEmail(email);
 
         return repository.save(admin);
     }
@@ -161,5 +164,21 @@ public class UserManager {
         }
 
         return repository.deleteById(User.class, userId);
+    }
+    private void validateUniqueEmail(String email) {
+
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+
+        for (User user : findAllUsers()) {
+            if (user.getEmail() != null
+                    && user.getEmail().equalsIgnoreCase(email.trim())) {
+
+                throw new IllegalArgumentException(
+                        "This email is already registered"
+                );
+            }
+        }
     }
 }

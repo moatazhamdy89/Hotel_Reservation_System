@@ -27,7 +27,7 @@ public class Admin extends User {
 
     // Constructor
     public Admin(
-            int nationalID,
+            String nationalID,
             int userID,
             String firstName,
             String lastName,
@@ -51,13 +51,18 @@ public class Admin extends User {
 
     // Registration factory: creates object only
     public static Admin createForRegistration(
-            int nationalID,
+            String nationalID,
             String firstName,
             String lastName,
             String gender,
             int age,
             String email,
             String rawPassword) {
+        if (!isNationalId(nationalID))
+            throw new IllegalArgumentException(
+                    "Invalid National ID (must be 14 digits)\n"
+            );
+
 
         if (!Validation.isValidEmail(email)) {
             throw new IllegalArgumentException(
@@ -78,6 +83,14 @@ public class Admin extends User {
                 || lastName == null || lastName.isBlank()) {
             throw new IllegalArgumentException(
                     "Name cannot be empty");
+        }
+        if (gender == null ||
+                (!gender.equalsIgnoreCase("Male")
+                        && !gender.equalsIgnoreCase("Female"))) {
+
+            throw new IllegalArgumentException(
+                    "Gender must be Male or Female"
+            );
         }
 
         if (age <= 0) {

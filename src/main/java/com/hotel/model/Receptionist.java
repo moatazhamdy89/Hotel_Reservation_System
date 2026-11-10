@@ -27,7 +27,7 @@ public class Receptionist extends User {
         super();
     }
 
-    public Receptionist(int nationalID, int userID,
+    public Receptionist(String nationalID, int userID,
                         String firstName, String lastName,
                         String gender, int age,
                         String email, String passwordHash,
@@ -52,7 +52,7 @@ public class Receptionist extends User {
     // Creates a Receptionist object for registration.
     // Does NOT save to the database.
     public static Receptionist createForRegistration(
-            int nationalID,
+            String nationalID,
             String firstName,
             String lastName,
             String gender,
@@ -61,6 +61,11 @@ public class Receptionist extends User {
             String rawPassword,
             String phone,
             String shift) {
+        if (!isNationalId(nationalID))
+            throw new IllegalArgumentException(
+                    "Invalid National ID (must be 14 digits)\n"
+            );
+
 
         if (!Validation.isValidEmail(email))
             throw new IllegalArgumentException(
@@ -78,6 +83,14 @@ public class Receptionist extends User {
                 || lastName == null || lastName.isBlank())
             throw new IllegalArgumentException(
                     "Name cannot be empty");
+        if (gender == null ||
+                (!gender.equalsIgnoreCase("Male")
+                        && !gender.equalsIgnoreCase("Female"))) {
+
+            throw new IllegalArgumentException(
+                    "Gender must be Male or Female"
+            );
+        }
 
         if (age <= 0)
             throw new IllegalArgumentException(
@@ -231,6 +244,7 @@ public class Receptionist extends User {
         roomManager.updateRoomStatus(
                 room.getRoomId(),
                 RoomStatus.UNDER_CLEANING);
+
     }
 
 

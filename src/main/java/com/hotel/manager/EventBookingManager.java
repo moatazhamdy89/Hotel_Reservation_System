@@ -177,4 +177,18 @@ public class EventBookingManager {
 
         return true;
     }
+    // Get all event halls
+    public List<EventHall> findAllHalls() {
+        return repository.findAll(EventHall.class);
+    }
+
+    // Find event hall by ID
+    public EventHall findHallById(int hallId) {
+
+        if (hallId <= 0) {
+            return null;
+        }
+
+        return repository.findById(EventHall.class, hallId);
+    }
 }

@@ -3,8 +3,12 @@ package com.hotel.manager;
 
 import com.hotel.model.Invoice;
 import com.hotel.enums.PaymentMethod;
+import com.hotel.model.LoyaltyProgram;
+import com.hotel.model.RoomInvoice;
 import com.hotel.repository.HibernateRepository;
+import jakarta.persistence.LockModeType;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class InvoiceManager {
@@ -63,13 +67,11 @@ public class InvoiceManager {
             PaymentMethod method) {
 
         if (invoiceId <= 0) {
-            throw new IllegalArgumentException(
-                    "Invalid invoice ID");
+            throw new IllegalArgumentException("Invalid invoice ID");
         }
 
         if (method == null) {
-            throw new IllegalArgumentException(
-                    "Payment method is required");
+            throw new IllegalArgumentException("Payment method is required");
         }
 
         return repository.withTransaction(session -> {
@@ -77,17 +79,50 @@ public class InvoiceManager {
             Invoice invoice = session.find(
                     Invoice.class,
                     invoiceId,
-                    jakarta.persistence.LockModeType.PESSIMISTIC_WRITE
+                    LockModeType.PESSIMISTIC_WRITE
             );
 
             if (invoice == null) {
-                throw new IllegalArgumentException(
-                        "Invoice not found");
+                throw new IllegalArgumentException("Invoice not found");
             }
 
-            invoice.pay(method);
+            if (invoice.isPaid()) {
+                throw new IllegalStateException("Invoice already paid");
+            }
 
-            // Hibernate automatically saves changes on commit
+            BigDecimal paidAmount = invoice.getRemainingAmount();
+
+            if (invoice instanceof RoomInvoice roomInvoice) {
+
+                int guestId = roomInvoice.getReservation()
+                        .getGuest().getUserID();
+
+                LoyaltyProgram loyalty = session.find(
+                        LoyaltyProgram.class,
+                        guestId,
+                        LockModeType.PESSIMISTIC_WRITE
+                );
+
+                if (loyalty == null) {
+                    throw new IllegalStateException(
+                            "Guest loyalty program not found"
+                    );
+                }
+
+                int earnedPoints = paidAmount
+                        .divideToIntegralValue(new BigDecimal("100"))
+                        .intValue();
+
+                invoice.pay(method);
+
+                if (earnedPoints > 0) {
+                    loyalty.addPoints(earnedPoints);
+                }
+
+            } else {
+                invoice.pay(method);
+            }
+
             return invoice;
         });
     }

@@ -241,4 +241,28 @@ public class ServiceOrderManager {
 
         return repository.update(order);
     }
+
+    // Find all available services
+    public List<Service> findAvailableServices() {
+
+        return repository.findAll(Service.class)
+                .stream()
+                .filter(service ->
+                        service.isAvailable()
+                                && service.getServiceDay() != null)
+                .toList();
+    }
+
+    // Find service by ID
+    public Service findServiceById(int serviceId) {
+
+        if (serviceId <= 0) {
+            return null;
+        }
+
+        return repository.findById(
+                Service.class,
+                serviceId
+        );
+    }
 }
