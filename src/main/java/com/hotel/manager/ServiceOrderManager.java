@@ -7,262 +7,123 @@ import com.hotel.model.ServiceOrder;
 import com.hotel.model.ServiceOrderItem;
 import com.hotel.repository.HibernateRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class ServiceOrderManager {
 
-    private final HibernateRepository repository =
-            new HibernateRepository();
+    private final HibernateRepository repository = new HibernateRepository();
 
-    // Add a new service order
     public boolean addOrder(ServiceOrder order) {
+        if (order == null) throw new IllegalArgumentException("Service order cannot be null");
+        if (order.getOrderId() > 0 || order.getReservation() == null) return false;
 
-        if (order == null) {
-            throw new IllegalArgumentException(
-                    "Service order cannot be null");
-        }
+        int reservationId = order.getReservation().getReservationId();
+        Reservation reservation = repository.findById(Reservation.class, reservationId);
 
-        if (order.getOrderId() > 0) {
-            return false;
-        }
-
-        if (order.getReservation() == null) {
-            return false;
-        }
-
-        int reservationId =
-                order.getReservation().getReservationId();
-
-        Reservation reservation =
-                repository.findById(
-                        Reservation.class, reservationId);
-
-        if (reservation == null) {
-            return false;
-        }
-
-        // One service order per reservation
-        if (findOrderByReservationId(reservationId) != null) {
-            return false;
-        }
+        if (reservation == null || findOrderByReservationId(reservationId) != null) return false;
 
         order.setReservation(reservation);
-
-        if (order.getOrderTime() == null) {
-            order.setOrderTime(LocalDateTime.now());
-        }
-
         repository.save(order);
         return true;
     }
 
-    // Find order by ID
     public ServiceOrder findOrderById(int orderId) {
-
-        if (orderId <= 0) {
-            return null;
-        }
-
-        return repository.findById(
-                ServiceOrder.class, orderId);
+        return orderId <= 0 ? null : repository.findById(ServiceOrder.class, orderId);
     }
 
-    // Find all orders
     public List<ServiceOrder> findAllOrders() {
-
         return repository.findAll(ServiceOrder.class);
     }
 
-    // Find order by reservation ID
-    public ServiceOrder findOrderByReservationId(
-            int reservationId) {
-
-        if (reservationId <= 0) {
-            return null;
-        }
-
-        for (ServiceOrder order : findAllOrders()) {
-
-            if (order.getReservation()
-                    .getReservationId() == reservationId) {
-                return order;
-            }
-        }
-
+    public ServiceOrder findOrderByReservationId(int reservationId) {
+        if (reservationId <= 0) return null;
+        for (ServiceOrder order : findAllOrders())
+            if (order.getReservation().getReservationId() == reservationId) return order;
         return null;
     }
 
-
-    // ==========================================
-    // NEW: ADD WEEKLY ACTIVITY WITH DATE
-    // ==========================================
-
-    public boolean addService(
-            int orderId,
-            int serviceId,
-            int quantity,
-            LocalDate scheduledDate) {
-
-        if (quantity <= 0) {
-            throw new IllegalArgumentException(
-                    "Quantity must be greater than zero");
-        }
-
-        if (scheduledDate == null) {
-            throw new IllegalArgumentException(
-                    "Scheduled date is required");
-        }
-
+    public boolean addService(int orderId, int serviceId, int quantity, LocalDate date) {
         ServiceOrder order = findOrderById(orderId);
+        Service service = findServiceById(serviceId);
+        if (order == null || service == null) return false;
 
-        Service service = repository.findById(
-                Service.class, serviceId);
-
-        if (order == null || service == null) {
-            return false;
-        }
-
-        if (!service.isAvailable()) {
-            return false;
-        }
-
-        if (service.getServiceDay() == null
-                || scheduledDate.getDayOfWeek()
-                != service.getServiceDay()) {
-
-            throw new IllegalArgumentException(
-                    "Activity is not scheduled on this day");
-        }
-
-        if (scheduledDate.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException(
-                    "Cannot book an activity in the past");
-        }
-
-        if (order.getReservation() == null) {
-            return false;
-        }
-
-        int reservationId =
-                order.getReservation().getReservationId();
-
-        Reservation reservation = repository.findById(
-                Reservation.class, reservationId
-        );
-
-        if (reservation == null) {
-            return false;
-        }
-
-        if (scheduledDate.isBefore(
-                reservation.getCheckInDate())
-                || !scheduledDate.isBefore(
-                reservation.getCheckOutDate())) {
-
-            throw new IllegalArgumentException(
-                    "Activity date must be within guest stay");
-        }
-
-        order.addService(service, quantity, scheduledDate);
-
+        order.addService(service, quantity, date);
         repository.update(order);
         return true;
     }
 
-    // Remove a service from an order
     public boolean removeService(int orderId, int serviceId) {
-
         ServiceOrder order = findOrderById(orderId);
+        if (order == null) return false;
 
-        if (order == null) {
-            return false;
-        }
+        Service service = order.getServices().stream()
+                .filter(s -> s.getServiceId() == serviceId)
+                .findFirst().orElse(null);
 
-        Service serviceToRemove = null;
+        if (service == null) return false;
+
+        order.removeService(service);
+        repository.update(order);
+        return true;
+    }
+
+    public boolean updateServiceQuantity(int orderId, int serviceId, int quantity) {
+        ServiceOrder order = findOrderById(orderId);
+        if (order == null) return false;
 
         for (ServiceOrderItem item : order.getItems()) {
             if (item.getService().getServiceId() == serviceId) {
-                serviceToRemove = item.getService();
-                break;
-            }
-        }
-
-        if (serviceToRemove == null) {
-            return false;
-        }
-
-        order.removeService(serviceToRemove);
-        repository.update(order);
-
-        return true;
-    }
-
-    // Update service quantity
-    public boolean updateServiceQuantity(
-            int orderId,
-            int serviceId,
-            int quantity) {
-
-        if (quantity <= 0) {
-            throw new IllegalArgumentException(
-                    "Quantity must be greater than zero");
-        }
-
-        ServiceOrder order = findOrderById(orderId);
-
-        if (order == null) {
-            return false;
-        }
-
-        for (ServiceOrderItem item : order.getItems()) {
-
-            if (item.getService()
-                    .getServiceId() == serviceId) {
-
                 item.setQuantity(quantity);
-
                 repository.update(order);
                 return true;
             }
         }
-
         return false;
     }
 
-    // Update an existing order
     public ServiceOrder updateOrder(ServiceOrder order) {
-
-        if (order == null || order.getOrderId() <= 0) {
-            throw new IllegalArgumentException(
-                    "A saved service order is required");
-        }
-
+        if (order == null || order.getOrderId() <= 0)
+            throw new IllegalArgumentException("A saved service order is required");
         return repository.update(order);
     }
 
-    // Find all available services
     public List<Service> findAvailableServices() {
-
-        return repository.findAll(Service.class)
-                .stream()
-                .filter(service ->
-                        service.isAvailable()
-                                && service.getServiceDay() != null)
+        return repository.findAll(Service.class).stream()
+                .filter(s -> s.isAvailable() && s.getServiceDay() != null)
                 .toList();
     }
 
-    // Find service by ID
     public Service findServiceById(int serviceId) {
+        return serviceId <= 0 ? null : repository.findById(Service.class, serviceId);
+    }
 
-        if (serviceId <= 0) {
-            return null;
+    public List<LocalDate> getAvailableDates(int reservationId, int serviceId) {
+        Reservation reservation = repository.findById(Reservation.class, reservationId);
+        Service service = findServiceById(serviceId);
+        if (reservation == null || service == null) return List.of();
+        return service.getAvailableDates(reservation);
+    }
+
+    public BigDecimal calculateServiceTotal(int serviceId, int quantity) {
+        Service service = findServiceById(serviceId);
+        if (service == null) throw new IllegalArgumentException("Service not found");
+        return service.calculateTotal(quantity);
+    }
+
+    public boolean bookService(int reservationId, int serviceId, int quantity, LocalDate date) {
+        Reservation reservation = repository.findById(Reservation.class, reservationId);
+        Service service = findServiceById(serviceId);
+        if (reservation == null || service == null || !service.canBookOn(reservation, date))
+            return false;
+
+        ServiceOrder order = findOrderByReservationId(reservationId);
+        if (order == null) {
+            order = new ServiceOrder(reservation);
+            if (!addOrder(order)) return false;
         }
 
-        return repository.findById(
-                Service.class,
-                serviceId
-        );
+        return addService(order.getOrderId(), serviceId, quantity, date);
     }
 }

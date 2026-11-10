@@ -172,52 +172,56 @@ public class Main {
         }
         return reservation;
     }
+
+
     private static void bookService(Guest guest) {
         heading("BOOK SERVICE / ACTIVITY");
         viewMyReservations(guest);
+
         int reservationId = readInt("Reservation ID: ");
-        Reservation reservation = getGuestReservation(guest, reservationId);
+        getGuestReservation(guest, reservationId);
+
         List<Service> services = serviceOrderManager.findAvailableServices();
         if (services.isEmpty()) {
-            System.out.println("No available weekly activities.");
+            System.out.println("No available activities.");
             return;
         }
-        for (Service service : services) {
-            System.out.println("ID: " + service.getServiceId() + " | " + service.getServiceName()
-                    + " | Price: " + service.getPrice() + " EGP | Day: " + service.getServiceDay()
-                    + " | Time: " + service.getStartTime());
-        }
+
+        for (Service s : services)
+            System.out.println(s.getServiceId() + " | " + s.getServiceName()
+                    + " | " + s.getPrice() + " EGP | "
+                    + s.getServiceDay() + " | " + s.getStartTime());
+
         int serviceId = readInt("Service ID: ");
-        Service selected = serviceOrderManager.findServiceById(serviceId);
-        if (selected == null || !selected.isAvailable() || selected.getServiceDay() == null) {
-            System.out.println("Service not available.");
+        List<LocalDate> dates = serviceOrderManager.getAvailableDates(reservationId, serviceId);
+
+        if (dates.isEmpty()) {
+            System.out.println("No available dates during your stay.");
             return;
         }
+
+        for (int i = 0; i < dates.size(); i++)
+            System.out.println((i + 1) + ". " + dates.get(i));
+
+        int choice = readInt("Choose Date: ");
+        if (choice < 1 || choice > dates.size()) {
+            System.out.println("Invalid date choice.");
+            return;
+        }
+
+        LocalDate date = dates.get(choice - 1);
         int quantity = readInt("Quantity: ");
-        LocalDate date = readDate("Activity Date (YYYY-MM-DD): ");
-        if (quantity <= 0 || date.isBefore(LocalDate.now())
-                || date.isBefore(reservation.getCheckInDate()) || !date.isBefore(reservation.getCheckOutDate())
-                || date.getDayOfWeek() != selected.getServiceDay()) {
-            System.out.println("Invalid quantity or activity date.");
-            return;
-        }
-        BigDecimal total = selected.getPrice().multiply(BigDecimal.valueOf(quantity));
-        System.out.println("Total: " + total + " EGP");
-        if (!input("Confirm service booking? (Y/N): ").equalsIgnoreCase("Y")) return;
-        ServiceOrder order = serviceOrderManager.findOrderByReservationId(reservationId);
-        if (order == null) {
-            order = new ServiceOrder(reservation);
-            if (!serviceOrderManager.addOrder(order)) {
-                System.out.println("Could not create service order.");
-                return;
-            }
-        }
-        if (serviceOrderManager.addService(order.getOrderId(), serviceId, quantity, date)) {
-            System.out.println("Service booked successfully! Order ID: " + order.getOrderId());
-        } else {
-            System.out.println("Service booking failed.");
-        }
+
+        System.out.println("Total: "
+                + serviceOrderManager.calculateServiceTotal(serviceId, quantity) + " EGP");
+
+        if (!input("Confirm booking? (Y/N): ").equalsIgnoreCase("Y")) return;
+
+        boolean booked = serviceOrderManager.bookService(reservationId, serviceId, quantity, date);
+        System.out.println(booked ? "Service booked successfully!" : "Booking failed.");
     }
+
+
     private static void bookEvent(Guest guest) {
         heading("BOOK EVENT HALL");
         List<EventHall> halls = eventBookingManager.findAllHalls();
