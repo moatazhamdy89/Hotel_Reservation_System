@@ -63,8 +63,10 @@ public abstract class User {
         if (!Validation.isValidEmail(email))
             throw new IllegalArgumentException("Invalid email format");
 
-        if (age <= 0)
-            throw new IllegalArgumentException("Age must be positive");
+        if (age <= 0 || age < 18)
+            throw new IllegalArgumentException(
+                    "Age must be positive and greater than or equal 18");
+
 
         if (isBlank(password))
             throw new IllegalArgumentException("Password hash cannot be empty");

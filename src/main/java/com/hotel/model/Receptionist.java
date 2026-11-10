@@ -92,9 +92,10 @@ public class Receptionist extends User {
             );
         }
 
-        if (age <= 0)
+        if (age <= 0 || age < 18)
             throw new IllegalArgumentException(
-                    "Age must be positive");
+                    "Age must be positive and greater than or equal 18");
+
 
         if (!isValidPhone(phone))
             throw new IllegalArgumentException(

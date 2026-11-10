@@ -97,7 +97,7 @@ public class Main {
                 gender, age, email, password,
                 nationality, phone
         );
-        System.out.println("Registration successful!");
+        System.out.println("Registration Successful!");
         System.out.println("Your User ID: " + guest.getUserID());
         System.out.println("Please login to continue.");
     }
@@ -157,7 +157,7 @@ public class Main {
                     case "0":
                         return;
                     default:
-                        System.out.println("Invalid choice.");
+                        System.out.println("Invalid Choice.");
                 }
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
@@ -310,6 +310,7 @@ public class Main {
         Review review = Review.create(reservation, rating, comment);
         System.out.println("Review submitted successfully! Review ID: " + review.getReviewId());
     }
+
     private static void viewRooms() {
         heading("AVAILABLE ROOMS");
         boolean found = false;
@@ -329,6 +330,7 @@ public class Main {
             System.out.println("No available rooms found.");
         }
     }
+
     private static void makeReservation(Guest guest) {
         heading("NEW RESERVATION");
         LocalDate checkIn = readDate("Check-in (YYYY-MM-DD): ");
@@ -697,6 +699,7 @@ public class Main {
         for (Reservation reservation : reservations) {
             printReservation(reservation);
         }
+        System.out.println("------------------------------");
         System.out.println("Total: " + reservations.size());
     }
     private static void printReservation(Reservation reservation) {
@@ -738,6 +741,7 @@ public class Main {
         }
         System.out.println("Total: " + users.size());
     }
+
     private static void heading(String title) {
         System.out.println("\n========================================");
         System.out.println("           " + title);
@@ -747,6 +751,7 @@ public class Main {
         System.out.print(prompt);
         return scanner.nextLine().trim();
     }
+
     private static int readInt(String prompt) {
         return Integer.parseInt(input(prompt));
     }

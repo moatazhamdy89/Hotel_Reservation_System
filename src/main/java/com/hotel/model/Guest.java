@@ -79,20 +79,6 @@ public class Guest extends User {
                     "Invalid National ID (must be 14 digits)\n"
             );
 
-        if (!Validation.isValidEmail(email)) {
-            throw new IllegalArgumentException(
-                    "Invalid email format");
-        }
-
-        List<String> problems =
-                Validation.passwordProblems(rawPassword, email);
-
-        if (!problems.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Weak password: "
-                            + String.join("; ", problems));
-        }
-
         if (isBlank(firstName) || isBlank(lastName)) {
             throw new IllegalArgumentException(
                     "Name cannot be empty");
@@ -107,10 +93,24 @@ public class Guest extends User {
             );
         }
 
-        if (age <= 0) {
+        if (age <= 0 || age < 18) {
             throw new IllegalArgumentException(
-                    "Age must be positive");
+                    "Age must be positive and greater than or equal 18");
         }
+
+        List<String> problems =
+                Validation.passwordProblems(rawPassword, email);
+
+        if (!Validation.isValidEmail(email)) {
+            throw new IllegalArgumentException(
+                    "Invalid email format");
+        }
+        if (!problems.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Weak password: "
+                            + String.join("; ", problems));
+        }
+
 
         if (isBlank(nationality)) {
             throw new IllegalArgumentException(

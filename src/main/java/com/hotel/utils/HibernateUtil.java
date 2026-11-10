@@ -46,19 +46,13 @@ public class HibernateUtil {
                 .addAnnotatedClass(Admin.class)
                 .addAnnotatedClass(Review.class)
 
-
-
-
-
-
-
                 .setProperty(
                         "hibernate.connection.driver_class",
                         "com.mysql.cj.jdbc.Driver")
 
                 .setProperty(
                         "hibernate.connection.url",
-                        "jdbc:mysql://localhost:3306/hotel_reservation_system")
+                        "jdbc:mysql://10.29.214.187/hotel_reservation_system")
 
                 .setProperty(
                         "hibernate.connection.username",
