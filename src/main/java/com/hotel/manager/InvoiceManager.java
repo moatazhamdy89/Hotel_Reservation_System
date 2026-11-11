@@ -1,10 +1,8 @@
 
 package com.hotel.manager;
 
-import com.hotel.model.Invoice;
+import com.hotel.model.*;
 import com.hotel.enums.PaymentMethod;
-import com.hotel.model.LoyaltyProgram;
-import com.hotel.model.RoomInvoice;
 import com.hotel.repository.HibernateRepository;
 import jakarta.persistence.LockModeType;
 
@@ -126,4 +124,15 @@ public class InvoiceManager {
             return invoice;
         });
     }
+
+    public RoomInvoice createRoomInvoice(Reservation reservation, ServiceOrder order) {
+        for (Invoice invoice : findAllInvoices()) {
+            if (invoice instanceof RoomInvoice roomInvoice &&
+                    roomInvoice.getReservation().getReservationId() == reservation.getReservationId())
+                return roomInvoice;
+        }
+
+        return (RoomInvoice) addInvoice(new RoomInvoice(reservation, order));
+    }
+
 }

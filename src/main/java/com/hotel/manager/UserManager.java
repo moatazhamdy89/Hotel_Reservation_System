@@ -181,4 +181,8 @@ public class UserManager {
             }
         }
     }
+    public Guest findGuestById(int guestId) {
+        if (guestId <= 0) return null;
+        return repository.findById(Guest.class, guestId);
+    }
 }

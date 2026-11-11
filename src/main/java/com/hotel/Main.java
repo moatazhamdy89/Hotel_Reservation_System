@@ -1,5 +1,6 @@
 package com.hotel;
 import com.hotel.enums.PaymentMethod;
+import com.hotel.enums.ReservationStatus;
 import com.hotel.enums.ViewType;
 import com.hotel.manager.DashboardManager;
 import com.hotel.manager.InvoiceManager;
@@ -135,12 +136,13 @@ public class Main {
                         viewMyInvoices(guest);
                         break;
                     case "6":
-                        payInvoice(guest);
+                        payRoomInvoice();
                         break;
                     case "7":
-                        Guest updatedGuest = repository.findById(Guest.class, guest.getUserID());
+                        Guest updatedGuest = userManager.findGuestById(guest.getUserID());
                         updatedGuest.displayProfile();
                         updatedGuest.viewPoints();
+                        cancelMyReservation(updatedGuest);
                         break;
                     case "8":
                         bookService(guest);
@@ -307,14 +309,44 @@ public class Main {
     private static void addHotelReview(Guest guest) {
         heading("ADD HOTEL REVIEW");
         viewMyReservations(guest);
+
         int reservationId = readInt("Reservation ID: ");
         Reservation reservation = getGuestReservation(guest, reservationId);
+
+        if (reservation == null) {
+            System.out.println("Reservation not found.");
+            return;
+        }
+
+        if (reservation.getStatus() != ReservationStatus.CHECKED_OUT) {
+            System.out.println("You can review only after checkout.");
+            return;
+        }
+
         int rating = readInt("Rating (1-5): ");
         String comment = input("Comment: ");
+
         Review review = Review.create(reservation, rating, comment);
         System.out.println("Review submitted successfully! Review ID: " + review.getReviewId());
     }
+    private static void viewAllHotelReviews() {
+        heading("HOTEL REVIEWS");
 
+        List<Review> reviews = Review.findAllReviews();
+
+        if (reviews.isEmpty()) {
+            System.out.println("No reviews found.");
+            return;
+        }
+
+        for (Review review : reviews) {
+            review.displayReview();
+            System.out.println("------------------------------");
+        }
+
+        System.out.println("Total Reviews: " + Review.getTotalReviews());
+        System.out.printf("Average Rating: %.2f/5%n", Review.getAverageRating());
+    }
     private static void viewRooms() {
         heading("AVAILABLE ROOMS");
         boolean found = false;
@@ -334,7 +366,6 @@ public class Main {
             System.out.println("No available rooms found.");
         }
     }
-
     private static void makeReservation(Guest guest) {
         heading("NEW RESERVATION");
         LocalDate checkIn = readDate("Check-in (YYYY-MM-DD): ");
@@ -528,47 +559,44 @@ public class Main {
             );
         }
     }
-    private static void payInvoice(Guest guest) {
-        heading("PAY INVOICE");
-        viewMyInvoices(guest);
+    private static void payRoomInvoice() {
+        heading("PAY ROOM INVOICE");
         int invoiceId = readInt("Invoice ID: ");
+        payRoomInvoiceById(invoiceId);
+    }
+    private static void payRoomInvoiceById(int invoiceId) {
         Invoice invoice = invoiceManager.findInvoiceById(invoiceId);
+
         if (!(invoice instanceof RoomInvoice)) {
             System.out.println("Room invoice not found.");
             return;
         }
-        RoomInvoice roomInvoice = (RoomInvoice) invoice;
-        if (roomInvoice.getReservation().getGuest().getUserID()
-                != guest.getUserID()) {
-            System.out.println("Invoice not found.");
-            return;
-        }
+
         if (invoice.isPaid()) {
             System.out.println("Invoice already paid.");
             return;
         }
+
+        System.out.println("Remaining Amount: " + invoice.getRemainingAmount() + " EGP");
+
         PaymentMethod[] methods = PaymentMethod.values();
-        for (int i = 0; i < methods.length; i++) {
+        for (int i = 0; i < methods.length; i++)
             System.out.println((i + 1) + ". " + methods[i]);
-        }
+
         int option = readInt("Payment method: ");
         if (option < 1 || option > methods.length) {
             System.out.println("Invalid payment method.");
             return;
         }
-        PaymentMethod method = methods[option - 1];
-        System.out.println(
-                "Remaining Amount: "
-                        + invoice.getRemainingAmount() + " EGP"
-        );
-        String confirm = input("Confirm payment? (Y/N): ");
-        if (!confirm.equalsIgnoreCase("Y")) {
+
+        if (!input("Confirm payment? (Y/N): ").equalsIgnoreCase("Y"))
             return;
-        }
-        Invoice paid = invoiceManager.payInvoice(invoiceId, method);
+
+        Invoice paid = invoiceManager.payInvoice(invoiceId, methods[option - 1]);
         System.out.println("Payment completed successfully!");
         paid.displayInvoice();
     }
+
     private static void adminMenu(User admin) {
         while (true) {
             heading("ADMIN MENU - " + admin.getFirstName());
@@ -579,6 +607,7 @@ public class Main {
             System.out.println("5. View All Users");
             System.out.println("6. Register New Admin");
             System.out.println("7. Register New Receptionist");
+            System.out.println("8. View All Hotel Reviews");
             System.out.println("0. Logout");
             String choice = input("Choose: ");
             try {
@@ -604,6 +633,7 @@ public class Main {
                     case "7":
                         registerNewReceptionist(admin);
                         break;
+                    case "8": viewAllHotelReviews(); break;
                     case "0":
                         return;
                     default:
@@ -656,6 +686,7 @@ public class Main {
             System.out.println("3. View All Invoices");
             System.out.println("4. Check-in Guest");
             System.out.println("5. Check-out Guest");
+            System.out.println("6. Pay Room Invoice");
             System.out.println("0. Logout");
             String choice = input("Choose: ");
             try {
@@ -665,6 +696,7 @@ public class Main {
                     case "3": viewAllInvoices(); break;
                     case "4": checkInGuest(); break;
                     case "5": checkOutGuest(); break;
+                    case "6": payRoomInvoice(); break;
                     case "0": return;
                     default: System.out.println("Invalid choice.");
                 }
@@ -685,18 +717,32 @@ public class Main {
         reservationManager.updateReservation(reservation);
         System.out.println("Check-in successful! Status: " + reservation.getStatus());
     }
+
     private static void checkOutGuest() {
         heading("GUEST CHECK-OUT");
         int id = readInt("Reservation ID: ");
         Reservation reservation = reservationManager.findReservationById(id);
+
         if (reservation == null) {
             System.out.println("Reservation not found.");
             return;
         }
+
         reservation.checkOut();
         reservationManager.updateReservation(reservation);
-        System.out.println("Check-out successful! Status: " + reservation.getStatus());
+
+        ServiceOrder order = serviceOrderManager.findOrderByReservationId(id);
+        RoomInvoice invoice = invoiceManager.createRoomInvoice(reservation, order);
+
+        System.out.println("Check-out successful!");
+        System.out.println("Status: " + reservation.getStatus());
+        System.out.println("Invoice ID: " + invoice.getInvoiceId());
+        System.out.println("Remaining Amount: " + invoice.getRemainingAmount() + " EGP");
+
+        if (input("Pay invoice now? (Y/N): ").equalsIgnoreCase("Y"))
+            payRoomInvoiceById(invoice.getInvoiceId());
     }
+
     private static void viewAllReservations() {
         heading("ALL RESERVATIONS");
         List<Reservation> reservations = reservationManager.findAllReservations();
@@ -744,6 +790,43 @@ public class Main {
             System.out.println("------------------------------");
         }
         System.out.println("Total: " + users.size());
+    }
+
+    private static void cancelMyReservation(Guest guest) {
+        if (!input("Do you want to cancel a reservation? (Y/N): ").equalsIgnoreCase("Y"))
+            return;
+
+        heading("CANCEL RESERVATION");
+        viewMyReservations(guest);
+
+        int id = readInt("Reservation ID to cancel: ");
+        Reservation reservation = reservationManager.findReservationById(id);
+
+        if (reservation == null ||
+                reservation.getGuest().getUserID() != guest.getUserID()) {
+            System.out.println("Reservation not found.");
+            return;
+        }
+
+        if (reservation.getStatus() != ReservationStatus.PENDING &&
+                reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            System.out.println("Only PENDING or CONFIRMED reservations can be cancelled.");
+            return;
+        }
+
+        System.out.println("Reservation ID: " + id);
+        System.out.println("Status: " + reservation.getStatus());
+
+        if (reservation.isDepositPaid())
+            System.out.println("Note: Deposit is non-refundable.");
+
+        if (!input("Confirm cancellation? (Y/N): ").equalsIgnoreCase("Y"))
+            return;
+
+        if (reservationManager.cancelReservation(id))
+            System.out.println("Reservation cancelled successfully!");
+        else
+            System.out.println("Cancellation failed.");
     }
 
     private static void heading(String title) {

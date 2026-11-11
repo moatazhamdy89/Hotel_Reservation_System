@@ -124,7 +124,9 @@ public class RoomInvoice extends Invoice {
         System.out.println("=== ROOM INVOICE ===");
 
         super.displayInvoice();
-
+        if (isPaid())
+            System.out.println("Amount Paid at Checkout: " +
+                    totalAmount.subtract(reservation.getDepositAmount()) + " EGP");
         System.out.println("Reservation ID: "
                 + reservation.getReservationId());
 

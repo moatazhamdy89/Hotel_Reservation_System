@@ -1,12 +1,10 @@
-
 package com.hotel.model;
 
 import com.hotel.enums.ReservationStatus;
 import com.hotel.repository.HibernateRepository;
-
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,12 +17,8 @@ public class Review {
     @Column(name = "review_id")
     private int reviewId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "reservation_id",
-            nullable = false,
-            unique = true
-    )
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "reservation_id", nullable = false, unique = true)
     private Reservation reservation;
 
     @Column(name = "rating")
@@ -36,253 +30,143 @@ public class Review {
     @Column(name = "date")
     private LocalDate date;
 
-    // Required by Hibernate
-    protected Review() {
-    }
+    protected Review() {}
 
-    // Creates a NEW Review object
-    private Review(Reservation reservation,
-                   int rating,
-                   String comment) {
-
+    private Review(Reservation reservation, int rating, String comment) {
         validate(reservation, rating);
-
         this.reservation = reservation;
         this.rating = rating;
         this.comment = normalize(comment);
         this.date = LocalDate.now();
     }
 
-    // Create and save a review
-    public static Review create(
-            Reservation reservation,
-            int rating,
-            String comment) {
-
+    public static Review create(Reservation reservation, int rating, String comment) {
         validate(reservation, rating);
 
-        if (!reservation.isSaved()) {
-            throw new IllegalStateException(
-                    "Reservation is not saved in the database yet");
-        }
+        if (!reservation.isSaved())
+            throw new IllegalStateException("Reservation is not saved in the database yet");
 
-        HibernateRepository repository =
-                new HibernateRepository();
+        HibernateRepository repository = new HibernateRepository();
 
-        return repository.withTransaction(session -> {
+        Reservation savedReservation = repository.findById(
+                Reservation.class, reservation.getReservationId());
 
-            Reservation savedReservation =
-                    session.find(
-                            Reservation.class,
-                            reservation.getReservationId()
-                    );
+        if (savedReservation == null)
+            throw new IllegalStateException("Reservation not found in database");
 
-            if (savedReservation == null) {
-                throw new IllegalStateException(
-                        "Reservation not found in database");
-            }
+        if (savedReservation.getStatus() != ReservationStatus.CHECKED_OUT)
+            throw new IllegalStateException("You can review only after checkout");
 
-            // Only checked-out guests can leave reviews
-            if (savedReservation.getStatus()
-                    != ReservationStatus.CHECKED_OUT) {
+        if (findFor(savedReservation).isPresent())
+            throw new IllegalStateException("This reservation already has a review");
 
-                throw new IllegalStateException(
-                        "Only a CHECKED_OUT reservation can be reviewed");
-            }
-
-            // Ensure the stay has ended
-            if (savedReservation.getCheckOutDate()
-                    .isAfter(LocalDate.now())) {
-
-                throw new IllegalStateException(
-                        "You can review only after the stay ends");
-            }
-
-            Long count = session.createSelectionQuery(
-                            "select count(r) from Review r " +
-                                    "where r.reservation.reservationId = :id",
-                            Long.class
-                    )
-                    .setParameter(
-                            "id",
-                            savedReservation.getReservationId()
-                    )
-                    .getSingleResult();
-
-            if (count > 0) {
-                throw new IllegalStateException(
-                        "This reservation already has a review");
-            }
-
-            Review review = new Review(
-                    savedReservation,
-                    rating,
-                    comment
-            );
-
-            session.persist(review);
-
-            return review;
-        });
+        Review review = new Review(savedReservation, rating, comment);
+        return repository.save(review);
     }
 
-    // Edit an existing review
-    public void editReview(
-            int newRating,
-            String newComment) {
-
+    public void editReview(int newRating, String newComment) {
         validate(reservation, newRating);
 
-        if (reviewId <= 0) {
-            throw new IllegalStateException(
-                    "Save the review before editing");
-        }
+        if (reviewId <= 0)
+            throw new IllegalStateException("Save the review before editing");
 
-        String cleaned = normalize(newComment);
+        HibernateRepository repository = new HibernateRepository();
+        Review savedReview = repository.findById(Review.class, reviewId);
 
-        HibernateRepository repository =
-                new HibernateRepository();
+        if (savedReview == null)
+            throw new IllegalStateException("Review not found in database");
 
-        repository.withTransaction(session -> {
+        savedReview.rating = newRating;
+        savedReview.comment = normalize(newComment);
 
-            Review savedReview =
-                    session.find(Review.class, reviewId);
+        repository.update(savedReview);
 
-            if (savedReview == null) {
-                throw new IllegalStateException(
-                        "Review " + reviewId
-                                + " not found in database");
-            }
-
-            savedReview.rating = newRating;
-            savedReview.comment = cleaned;
-
-            return null;
-        });
-
-        // Keep this Java object synchronized after commit
-        this.rating = newRating;
-        this.comment = cleaned;
+        this.rating = savedReview.rating;
+        this.comment = savedReview.comment;
     }
 
-    // Find a review for a reservation
-    public static Optional<Review> findFor(
-            Reservation reservation) {
-
-        if (reservation == null
-                || !reservation.isSaved()) {
+    public static Optional<Review> findFor(Reservation reservation) {
+        if (reservation == null || !reservation.isSaved())
             return Optional.empty();
+
+        HibernateRepository repository = new HibernateRepository();
+
+        for (Review review : repository.findAll(Review.class)) {
+            if (review.getReservation().getReservationId()
+                    == reservation.getReservationId())
+                return Optional.of(review);
         }
 
-        HibernateRepository repository =
-                new HibernateRepository();
-
-        return repository.withTransaction(session -> {
-
-            Review review = session.createSelectionQuery(
-                            "select r from Review r " +
-                                    "join fetch r.reservation res " +
-                                    "join fetch res.guest " +
-                                    "where res.reservationId = :id",
-                            Review.class
-                    )
-                    .setParameter(
-                            "id",
-                            reservation.getReservationId()
-                    )
-                    .uniqueResult();
-
-            return Optional.ofNullable(review);
-        });
+        return Optional.empty();
     }
 
-    // NEW: Find all hotel reviews
     public static List<Review> findAllReviews() {
+        HibernateRepository repository = new HibernateRepository();
+        List<Review> reviews = new ArrayList<>(repository.findAll(Review.class));
 
-        HibernateRepository repository =
-                new HibernateRepository();
+        for (int i = 0; i < reviews.size() - 1; i++) {
+            for (int j = i + 1; j < reviews.size(); j++) {
+                Review first = reviews.get(i);
+                Review second = reviews.get(j);
 
-        return repository.withTransaction(session ->
-                session.createSelectionQuery(
-                        "select r from Review r " +
-                                "join fetch r.reservation res " +
-                                "join fetch res.guest " +
-                                "order by r.date desc, r.reviewId desc",
-                        Review.class
-                ).getResultList()
-        );
+                if (first.getDate().isBefore(second.getDate())
+                        || (first.getDate().equals(second.getDate())
+                        && first.getReviewId() < second.getReviewId())) {
+                    reviews.set(i, second);
+                    reviews.set(j, first);
+                }
+            }
+        }
+
+        return reviews;
     }
 
-    // NEW: Calculate average hotel rating
     public static double getAverageRating() {
+        List<Review> reviews = findAllReviews();
 
-        HibernateRepository repository =
-                new HibernateRepository();
+        if (reviews.isEmpty()) return 0.0;
 
-        return repository.withTransaction(session -> {
+        int total = 0;
+        for (Review review : reviews)
+            total += review.getRating();
 
-            Double average = session.createSelectionQuery(
-                    "select avg(r.rating) from Review r",
-                    Double.class
-            ).getSingleResult();
-
-            return average == null ? 0.0 : average;
-        });
+        return (double) total / reviews.size();
     }
 
-    // NEW: Count hotel reviews
     public static long getTotalReviews() {
+        HibernateRepository repository = new HibernateRepository();
+        long count = 0;
 
-        HibernateRepository repository =
-                new HibernateRepository();
+        for (Review review : repository.findAll(Review.class))
+            count++;
 
-        return repository.withTransaction(session ->
-                session.createSelectionQuery(
-                        "select count(r) from Review r",
-                        Long.class
-                ).getSingleResult()
-        );
+        return count;
     }
 
     public void displayReview() {
         System.out.println(
-                "Review #" + reviewId
-                        + " | Reservation #"
-                        + reservation.getReservationId()
-                        + " | Guest: "
-                        + reservation.getGuest().getFirstName()
-                        + " | " + date
+                "Review #" + reviewId +
+                        " | Reservation #" + reservation.getReservationId() +
+                        " | Guest: " + reservation.getGuest().getFirstName() +
+                        " | " + date
         );
 
-        System.out.println(
-                "Rating: " + rating + "/5"
-        );
-
-        System.out.println(
-                "Comment: "
-                        + (comment == null ? "(none)" : comment)
-        );
+        System.out.println("Rating: " + rating + "/5");
+        System.out.println("Comment: " + (comment == null ? "(none)" : comment));
     }
 
-    private static void validate(
-            Reservation reservation,
-            int rating) {
+    private static void validate(Reservation reservation, int rating) {
+        if (reservation == null)
+            throw new IllegalArgumentException("Reservation is required");
 
-        if (reservation == null) {
-            throw new IllegalArgumentException(
-                    "Reservation is required");
-        }
-
-        if (rating < 1 || rating > 5) {
-            throw new IllegalArgumentException(
-                    "Rating must be between 1 and 5");
-        }
+        if (rating < 1 || rating > 5)
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
     }
 
-    private static String normalize(String c) {
-        return (c == null || c.isBlank())
-                ? null
-                : c.trim();
+    private static String normalize(String comment) {
+        if (comment == null || comment.isBlank())
+            return null;
+        return comment.trim();
     }
 
     public int getReviewId() {
