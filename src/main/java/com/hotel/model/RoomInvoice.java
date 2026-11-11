@@ -3,25 +3,24 @@ package com.hotel.model;
 import com.hotel.enums.ReservationStatus;
 import jakarta.persistence.*;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @Table(name = "room_invoices")
 @PrimaryKeyJoinColumn(name = "invoice_id")
 public class RoomInvoice extends Invoice {
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "reservation_id", nullable = false, unique = true)
     private Reservation reservation;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "service_order_id", unique = true)
     private ServiceOrder serviceOrder;
 
-    @JdbcTypeCode(SqlTypes.DECIMAL)
     @Column(name = "discount_amount", precision = 10, scale = 2)
-    private double discountAmount;
+    private BigDecimal discountAmount;
 
     // Required by Hibernate
     protected RoomInvoice() {
@@ -37,10 +36,13 @@ public class RoomInvoice extends Invoice {
                     "Reservation is required");
         }
 
-        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+
+        if (reservation.getStatus() != ReservationStatus.CHECKED_IN
+                && reservation.getStatus() != ReservationStatus.CHECKED_OUT) {
             throw new IllegalArgumentException(
-                    "Only a CONFIRMED reservation can have a room invoice");
+                    "Room invoice requires a checked-in or checked-out reservation");
         }
+
 
         if (!reservation.isDepositPaid()) {
             throw new IllegalArgumentException(
@@ -69,54 +71,52 @@ public class RoomInvoice extends Invoice {
 
         this.reservation = reservation;
         this.serviceOrder = serviceOrder;
-
-        lockTotal();
+        this.totalAmount = calculateTotal();
     }
 
     @Override
-    public double calculateTotal() {
-        double accommodationCost =
+    public BigDecimal calculateTotal() {
+        BigDecimal accommodationCost =
                 reservation.calculateAccommodationCost();
 
-        double discountRate = reservation.getGuest()
+        BigDecimal discountRate = reservation.getGuest()
                 .getLoyaltyProgram()
                 .calculateDiscount();
 
-        discountAmount = round2(accommodationCost * discountRate);
+        discountAmount = accommodationCost.multiply(discountRate).setScale(2, RoundingMode.HALF_UP);
 
-        return round2(
-                accommodationCost
-                        - discountAmount
-                        + calculateServicesCost());
+        BigDecimal servicesCost = calculateServicesCost();
+
+        return accommodationCost
+                .subtract(discountAmount)
+                .add(servicesCost)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
-    public double calculateServicesCost() {
-        if (serviceOrder == null) {
-            return 0.0;
-        }
+    public BigDecimal calculateServicesCost() {
+        if (serviceOrder == null) return BigDecimal.ZERO;
 
-        double total = 0.0;
-
-        for (Service service : serviceOrder.getServices()) {
-            total += service.getPrice();
-        }
+        BigDecimal total = BigDecimal.ZERO;
+        for (ServiceOrderItem item : serviceOrder.getItems())
+            total = total.add(item.getService().calculateTotal(item.getQuantity()));
 
         return round2(total);
     }
 
     @Override
-    public double getRemainingAmount() {
+    public BigDecimal getRemainingAmount() {
         if (isPaid) {
-            return 0.0;
+            return new BigDecimal("0.00");
         }
 
-        double remaining = totalAmount - reservation.getDepositAmount();
+        BigDecimal depositAmount = reservation.getDepositAmount();
+        BigDecimal remaining = totalAmount.subtract(depositAmount != null ? depositAmount : new BigDecimal("0.00"));
 
-        if (remaining < 0) {
-            return 0.0;
+        if (remaining != null && remaining.compareTo(BigDecimal.ZERO) < 0) {
+            return new BigDecimal("0.00");
         }
 
-        return round2(remaining);
+        return remaining.setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override
@@ -124,7 +124,9 @@ public class RoomInvoice extends Invoice {
         System.out.println("=== ROOM INVOICE ===");
 
         super.displayInvoice();
-
+        if (isPaid())
+            System.out.println("Amount Paid at Checkout: " +
+                    totalAmount.subtract(reservation.getDepositAmount()) + " EGP");
         System.out.println("Reservation ID: "
                 + reservation.getReservationId());
 
@@ -152,7 +154,7 @@ public class RoomInvoice extends Invoice {
         return serviceOrder;
     }
 
-    public double getDiscountAmount() {
+    public BigDecimal getDiscountAmount() {
         return discountAmount;
     }
 }

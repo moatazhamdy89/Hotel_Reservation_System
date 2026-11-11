@@ -1,15 +1,14 @@
 package com.hotel.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "event_halls")
 public class EventHall {
 
-    @Id // 3shan da primary key f 3mlna @ID
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-increment
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "hall_id")
     private int hallId;
 
@@ -19,9 +18,8 @@ public class EventHall {
     @Column(name = "location")
     private String location;
 
-    @JdbcTypeCode(SqlTypes.DECIMAL)
     @Column(name = "rental_price", precision = 10, scale = 2)
-    private double rentalPrice;
+    private BigDecimal rentalPrice;
 
     @Column(name = "max_capacity")
     private int maxCapacity;
@@ -32,11 +30,11 @@ public class EventHall {
 
     // Constructor for creating a new hall
     public EventHall(String hallName, String location,
-                     double rentalPrice, int maxCapacity) {
-        this.hallName= hallName;
-        this.location = location;
-        this.rentalPrice = rentalPrice;
-        this.maxCapacity = maxCapacity;
+                     BigDecimal rentalPrice, int maxCapacity) {
+        this.setHallName(hallName);
+        this.setLocation(location);
+        this.setRentalPrice(rentalPrice);
+        this.setMaxCapacity(maxCapacity);
     }
 
     public int getHallId() {
@@ -51,7 +49,7 @@ public class EventHall {
         return location;
     }
 
-    public double getRentalPrice() {
+    public BigDecimal getRentalPrice() {
         return rentalPrice;
     }
 
@@ -73,8 +71,9 @@ public class EventHall {
         this.location = location;
     }
 
-    public void setRentalPrice(double rentalPrice) {
-        if (!Double.isFinite(rentalPrice) || rentalPrice < 0) {
+    public void setRentalPrice(BigDecimal rentalPrice) {
+        if (rentalPrice == null ||
+                rentalPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Invalid rental price");
         }
         this.rentalPrice = rentalPrice;

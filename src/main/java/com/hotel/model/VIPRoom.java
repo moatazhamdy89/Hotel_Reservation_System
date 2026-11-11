@@ -3,6 +3,8 @@ package com.hotel.model;
 import com.hotel.enums.RoomStatus;
 import com.hotel.enums.ViewType;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+
 
 @Entity
 @Table(name = "vip_rooms")
@@ -24,7 +26,7 @@ public class VIPRoom extends Room {
     }
 
     public VIPRoom(int roomId, int roomNumber, int floorNumber,
-                   double basePrice, RoomStatus status, ViewType viewType,
+                   BigDecimal basePrice, RoomStatus status, ViewType viewType,
                    String description, boolean hasPrivatePoolOrJacuzzi,
                    boolean hasButlerService, boolean hasVipLoungeAccess) {
 
@@ -42,11 +44,6 @@ public class VIPRoom extends Room {
 
     public void setHasButlerService(boolean hasButlerService) {
         this.hasButlerService = hasButlerService;
-    }
-
-    public boolean hasVipLoungeAccess() {
-        return this.status != RoomStatus.UNDER_MAINTAINANCE
-                && hasVipLoungeAccess;
     }
 
     public void setHasVipLoungeAccess(boolean hasVipLoungeAccess) {

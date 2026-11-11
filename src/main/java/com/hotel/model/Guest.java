@@ -4,6 +4,7 @@ import com.hotel.utils.PasswordHasher;
 import com.hotel.utils.Validation;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -31,7 +32,7 @@ public class Guest extends User {
     }
 
     // Constructor for creating a Guest object
-    public Guest(int nationalID, int userID,
+    public Guest(String nationalID, int userID,
                  String firstName, String lastName,
                  String gender, int age,
                  String email, String passwordHash,
@@ -51,6 +52,7 @@ public class Guest extends User {
                     "Invalid phone number");
         }
 
+
         this.nationality = nationality.trim();
         this.phone = phone.trim();
 
@@ -61,7 +63,7 @@ public class Guest extends User {
     // Validates input, hashes password and creates a Guest.
     // Does NOT save to the database.
     public static Guest createForRegistration(
-            int nationalID,
+            String nationalID,
             String firstName,
             String lastName,
             String gender,
@@ -71,29 +73,44 @@ public class Guest extends User {
             String nationality,
             String phone) {
 
-        if (!Validation.isValidEmail(email)) {
-            throw new IllegalArgumentException(
-                    "Invalid email format");
-        }
 
-        List<String> problems =
-                Validation.passwordProblems(rawPassword, email);
-
-        if (!problems.isEmpty()) {
+        if (!isNationalId(nationalID))
             throw new IllegalArgumentException(
-                    "Weak password: "
-                            + String.join("; ", problems));
-        }
+                    "Invalid National ID (must be 14 digits)\n"
+            );
 
         if (isBlank(firstName) || isBlank(lastName)) {
             throw new IllegalArgumentException(
                     "Name cannot be empty");
         }
 
-        if (age <= 0) {
+        if (gender == null ||
+                (!gender.equalsIgnoreCase("Male")
+                        && !gender.equalsIgnoreCase("Female"))) {
+
             throw new IllegalArgumentException(
-                    "Age must be positive");
+                    "Gender must be Male or Female"
+            );
         }
+
+        if (age <= 0 || age < 18) {
+            throw new IllegalArgumentException(
+                    "Age must be positive and greater than or equal 18");
+        }
+
+        List<String> problems =
+                Validation.passwordProblems(rawPassword, email);
+
+        if (!Validation.isValidEmail(email)) {
+            throw new IllegalArgumentException(
+                    "Invalid email format");
+        }
+        if (!problems.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Weak password: "
+                            + String.join("; ", problems));
+        }
+
 
         if (isBlank(nationality)) {
             throw new IllegalArgumentException(
@@ -142,9 +159,7 @@ public class Guest extends User {
         System.out.println("Phone: " + phone);
     }
 
-    public void viewProfile() {
-        displayProfile();
-    }
+
 
     public void viewPoints() {
         System.out.println(
@@ -156,9 +171,11 @@ public class Guest extends User {
 
         System.out.println(
                 "Discount: "
-                        + (int) (
-                        loyaltyProgram.calculateDiscount() * 100
-                ) + "%");
+                        + loyaltyProgram.calculateDiscount()
+                        .multiply(new BigDecimal("100"))
+                        .intValue()
+                        + "%"
+        );
     }
 
     private static boolean isBlank(String s) {
@@ -167,6 +184,6 @@ public class Guest extends User {
 
     private static boolean isValidPhone(String p) {
         return p != null
-                && p.trim().matches("^\\+?[0-9]{8,15}$");
+                && p.trim().matches("^\\+?[0-9]{11}$");
     }
 }

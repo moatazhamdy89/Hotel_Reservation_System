@@ -3,13 +3,15 @@ package com.hotel.model;
 import com.hotel.enums.EventBookingStatus;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "event_invoices")
 @PrimaryKeyJoinColumn(name = "invoice_id")
 public class EventInvoice extends Invoice {
 
     // Linked to one event booking; no setter to prevent changing it
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "event_booking_id", nullable = false, unique = true)
     private EventBooking eventBooking;
 
@@ -32,26 +34,29 @@ public class EventInvoice extends Invoice {
                             + eventBooking.getStatus());
 
         this.eventBooking = eventBooking;
-
-        // Calculate and freeze the total when the invoice is issued
-        lockTotal();
+        this.totalAmount = calculateTotal();
     }
 
     @Override
-    public double calculateTotal() {
+    public BigDecimal calculateTotal() {
         return round2(eventBooking.getHall().getRentalPrice());
     }
 
     @Override
-    public double getRemainingAmount() {
+    public BigDecimal getRemainingAmount() {
         if (isPaid)
-            return 0.0;
+            return BigDecimal.ZERO;
 
-        double paidDeposit = eventBooking.isDepositPaid()
+        BigDecimal paidDeposit = eventBooking.isDepositPaid()
                 ? eventBooking.getDepositAmount()
-                : 0.0;
+                : BigDecimal.ZERO;
 
-        return round2(Math.max(0.0, totalAmount - paidDeposit));
+        BigDecimal remaining = totalAmount.subtract(paidDeposit);
+
+        if (remaining.compareTo(BigDecimal.ZERO) < 0)
+            return BigDecimal.ZERO;
+
+        return round2(remaining);
     }
 
     @Override
@@ -67,7 +72,9 @@ public class EventInvoice extends Invoice {
                 + eventBooking.getHall().getHallName());
 
         System.out.println("Deposit: "
-                + String.format("%.2f", eventBooking.getDepositAmount())
+                + eventBooking.getDepositAmount()
+                .setScale(2, java.math.RoundingMode.HALF_UP)
+                .toPlainString()
                 + (eventBooking.isDepositPaid()
                 ? " (paid)"
                 : " (not paid)"));

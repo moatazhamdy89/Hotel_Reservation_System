@@ -10,10 +10,11 @@ import jakarta.persistence.*;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class User {
 
-    @Column(name = "national_id")
-    protected int nationalID;
+    @Column(name = "national_id", length = 14)
+    protected String nationalID;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     protected int userID;
 
@@ -38,6 +39,8 @@ public abstract class User {
     @Column(name = "role")
     protected String role;
 
+
+
     @Transient
     private boolean loggedIn = false;
 
@@ -45,9 +48,14 @@ public abstract class User {
     protected User() {
     }
 
-    protected User(int nationalID, int userID, String firstName,
+    protected User(String nationalID, int userID, String firstName,
                    String lastName, String gender, int age,
                    String email, String password, String role) {
+
+        if (!isNationalId(nationalID)) {
+            throw new IllegalArgumentException(
+                    "Invalid National Id (Must be 14 digits)");
+        }
 
         if (isBlank(firstName) || isBlank(lastName))
             throw new IllegalArgumentException("Name cannot be empty");
@@ -55,8 +63,10 @@ public abstract class User {
         if (!Validation.isValidEmail(email))
             throw new IllegalArgumentException("Invalid email format");
 
-        if (age <= 0)
-            throw new IllegalArgumentException("Age must be positive");
+        if (age <= 0 || age < 18)
+            throw new IllegalArgumentException(
+                    "Age must be positive and greater than or equal 18");
+
 
         if (isBlank(password))
             throw new IllegalArgumentException("Password hash cannot be empty");
@@ -80,7 +90,7 @@ public abstract class User {
     }
 
     // Getters
-    public int getNationalID() { return nationalID; }
+    public String getNationalID() { return nationalID; }
     public int getUserID() { return userID; }
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
@@ -122,6 +132,8 @@ public abstract class User {
         loggedIn = false;
     }
 
+
+
     // Display
     public void displayProfile() {
         System.out.println("ID: " + userID);
@@ -129,5 +141,10 @@ public abstract class User {
         System.out.println("Gender: " + gender + " | Age: " + age);
         System.out.println("Email: " + email);
         System.out.println("Role: " + role);
+    }
+
+    protected static boolean isNationalId(String nationalID) {
+        return nationalID != null
+                && nationalID.matches("^[0-9]{14}$");
     }
 }

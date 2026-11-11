@@ -2,7 +2,8 @@ package com.hotel.model;
 
 import com.hotel.enums.ReservationStatus;
 import com.hotel.enums.RoomStatus;
-import com.hotel.repository.HibernateRepository;
+import com.hotel.manager.ReservationManager;
+import com.hotel.manager.RoomManager;
 import com.hotel.utils.PasswordHasher;
 import com.hotel.utils.Validation;
 
@@ -26,7 +27,7 @@ public class Receptionist extends User {
         super();
     }
 
-    public Receptionist(int nationalID, int userID,
+    public Receptionist(String nationalID, int userID,
                         String firstName, String lastName,
                         String gender, int age,
                         String email, String passwordHash,
@@ -51,7 +52,7 @@ public class Receptionist extends User {
     // Creates a Receptionist object for registration.
     // Does NOT save to the database.
     public static Receptionist createForRegistration(
-            int nationalID,
+            String nationalID,
             String firstName,
             String lastName,
             String gender,
@@ -60,6 +61,11 @@ public class Receptionist extends User {
             String rawPassword,
             String phone,
             String shift) {
+        if (!isNationalId(nationalID))
+            throw new IllegalArgumentException(
+                    "Invalid National ID (must be 14 digits)\n"
+            );
+
 
         if (!Validation.isValidEmail(email))
             throw new IllegalArgumentException(
@@ -77,10 +83,19 @@ public class Receptionist extends User {
                 || lastName == null || lastName.isBlank())
             throw new IllegalArgumentException(
                     "Name cannot be empty");
+        if (gender == null ||
+                (!gender.equalsIgnoreCase("Male")
+                        && !gender.equalsIgnoreCase("Female"))) {
 
-        if (age <= 0)
             throw new IllegalArgumentException(
-                    "Age must be positive");
+                    "Gender must be Male or Female"
+            );
+        }
+
+        if (age <= 0 || age < 18)
+            throw new IllegalArgumentException(
+                    "Age must be positive and greater than or equal 18");
+
 
         if (!isValidPhone(phone))
             throw new IllegalArgumentException(
@@ -140,39 +155,6 @@ public class Receptionist extends User {
         guest.displayProfile();
     }
 
-    public void updateRoomStatus(Room room,
-                                 RoomStatus newStatus) {
-        requireLoggedIn();
-
-        if (room == null)
-            throw new IllegalArgumentException(
-                    "Room is required");
-
-        if (newStatus == null)
-            throw new IllegalArgumentException(
-                    "Status is required");
-
-        HibernateRepository repository =
-                new HibernateRepository();
-
-        repository.withTransaction(session -> {
-
-            Room savedRoom =
-                    session.find(Room.class, room.getRoomId());
-
-            if (savedRoom == null)
-                throw new IllegalStateException(
-                        "Room " + room.getRoomId()
-                                + " not found in database");
-
-            savedRoom.setStatus(newStatus);
-
-            return null;
-        });
-
-        // Update local object only after successful commit
-        room.setStatus(newStatus);
-    }
 
     public RoomStatus viewRoomStatus(Room room) {
         requireLoggedIn();
@@ -181,59 +163,94 @@ public class Receptionist extends User {
             throw new IllegalArgumentException(
                     "Room is required");
 
-        return room.status;
+        return room.getStatus();
     }
+
 
     public void checkInGuest(Reservation reservation) {
         requireLoggedIn();
 
-        if (reservation == null)
+        if (reservation == null || !reservation.isSaved())
             throw new IllegalArgumentException(
-                    "Reservation is required");
+                    "A saved reservation is required");
 
-        if (reservation.getStatus()
-                != ReservationStatus.CONFIRMED
-                || !reservation.isDepositPaid())
-            throw new IllegalStateException(
-                    "Only a CONFIRMED reservation with "
-                            + "a paid deposit can check in");
+        ReservationManager reservationManager =
+                new ReservationManager();
 
-        Room room = reservation.getRoom();
+        RoomManager roomManager = new RoomManager();
 
-        if (!room.isAvailable())
+        Reservation savedReservation =
+                reservationManager.findReservationById(
+                        reservation.getReservationId());
+
+        if (savedReservation == null)
+            throw new IllegalArgumentException(
+                    "Reservation not found");
+
+        Room room = roomManager.findRoomById(
+                savedReservation.getRoom().getRoomId());
+
+        if (room == null || !room.isAvailable())
             throw new IllegalStateException(
                     "Room is not available for check-in");
 
-        updateRoomStatus(room, RoomStatus.OCCUPIED);
+        savedReservation.checkIn();
+
+        reservationManager.updateReservation(savedReservation);
+
+        roomManager.updateRoomStatus(
+                room.getRoomId(),
+                RoomStatus.OCCUPIED);
     }
 
-    /**
-     * Room invoice creation and final payment belong to Billing.
-     * This method only changes the room status to UNDER_CLEANING.
-     */
+
+
+
     public void checkOutGuest(Reservation reservation) {
         requireLoggedIn();
 
-        if (reservation == null)
+        if (reservation == null || !reservation.isSaved())
             throw new IllegalArgumentException(
-                    "Reservation is required");
+                    "A saved reservation is required");
 
-        if (reservation.getStatus()
-                != ReservationStatus.CONFIRMED)
-            throw new IllegalStateException(
-                    "Only a CONFIRMED reservation can check out");
+        ReservationManager reservationManager =
+                new ReservationManager();
 
-        Room room = reservation.getRoom();
+        RoomManager roomManager = new RoomManager();
 
-        if (room.status != RoomStatus.OCCUPIED)
+        // Load the latest reservation from the database
+        Reservation savedReservation =
+                reservationManager.findReservationById(
+                        reservation.getReservationId());
+
+        if (savedReservation == null)
+            throw new IllegalArgumentException(
+                    "Reservation not found");
+
+        // Load the latest room status
+        Room room = roomManager.findRoomById(
+                savedReservation.getRoom().getRoomId());
+
+        if (room == null || room.getStatus() != RoomStatus.OCCUPIED)
             throw new IllegalStateException(
                     "Room is not currently occupied");
 
-        updateRoomStatus(room, RoomStatus.UNDER_CLEANING);
+        // Validate reservation status and check-out date
+        savedReservation.checkOut();
+
+        // Save the new reservation status
+        reservationManager.updateReservation(savedReservation);
+
+        // Mark the room as needing cleaning
+        roomManager.updateRoomStatus(
+                room.getRoomId(),
+                RoomStatus.UNDER_CLEANING);
+
     }
+
 
     private static boolean isValidPhone(String p) {
         return p != null
-                && p.trim().matches("^\\+?[0-9]{8,15}$");
+                && p.trim().matches("^\\+?[0-9]{11}$");
     }
 }

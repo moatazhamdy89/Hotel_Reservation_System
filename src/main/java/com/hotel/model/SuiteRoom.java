@@ -3,6 +3,8 @@ package com.hotel.model;
 import com.hotel.enums.RoomStatus;
 import com.hotel.enums.ViewType;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+
 
 @Entity
 @Table(name = "suite_rooms")
@@ -24,7 +26,7 @@ public class SuiteRoom extends Room {
     }
 
     public SuiteRoom(int roomId, int roomNumber, int floorNumber,
-                     double basePrice, RoomStatus status,
+                     BigDecimal basePrice, RoomStatus status,
                      ViewType viewType, String description,
                      int numberOfRooms, boolean hasLivingRoom,
                      boolean hasDiningArea) {
@@ -32,7 +34,7 @@ public class SuiteRoom extends Room {
         super(roomId, roomNumber, floorNumber, basePrice,
                 status, viewType, description, 4);
 
-        this.numberOfRooms = numberOfRooms > 0 ? numberOfRooms : 2;
+        this.numberOfRooms = numberOfRooms > 0 && numberOfRooms < 4 ? numberOfRooms : 2;
         this.hasLivingRoom = hasLivingRoom;
         this.hasDiningArea = hasDiningArea;
     }

@@ -3,8 +3,7 @@ package com.hotel.model;
 import com.hotel.enums.MembershipLevel;
 import jakarta.persistence.*;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "loyalty_programs")
@@ -14,7 +13,6 @@ public class LoyaltyProgram {
     @Column(name = "guest_id")
     private int guestId;
 
-
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "guest_id")
@@ -23,9 +21,8 @@ public class LoyaltyProgram {
     @Column(name = "points")
     private int points;
 
-    @JdbcTypeCode(SqlTypes.DECIMAL)
     @Column(name = "discount", precision = 10, scale = 2)
-    private double discount;
+    private BigDecimal discount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "membership_level")
@@ -68,17 +65,17 @@ public class LoyaltyProgram {
     public void updateMembershipLevel() {
         if (points >= 300) {
             membershipLevel = MembershipLevel.GOLD;
-            discount = 0.10;
+            discount = new BigDecimal("0.10");
         } else if (points >= 100) {
             membershipLevel = MembershipLevel.SILVER;
-            discount = 0.05;
+            discount = new BigDecimal("0.05");
         } else {
             membershipLevel = MembershipLevel.BRONZE;
-            discount = 0.0;
+            discount = new BigDecimal("0.00");
         }
     }
 
-    public double calculateDiscount() {
+    public BigDecimal calculateDiscount() {
         return discount;
     }
 

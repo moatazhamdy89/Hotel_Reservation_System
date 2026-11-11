@@ -4,6 +4,8 @@ import com.hotel.enums.BedType;
 import com.hotel.enums.RoomStatus;
 import com.hotel.enums.ViewType;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+
 
 @Entity
 @Table(name = "single_rooms")
@@ -20,7 +22,7 @@ public class SingleRoom extends Room {
     }
 
     public SingleRoom(int roomId, int roomNumber, int floorNumber,
-                      double basePrice, RoomStatus status,
+                      BigDecimal basePrice, RoomStatus status,
                       ViewType viewType, String description,
                       BedType bedType) {
 
