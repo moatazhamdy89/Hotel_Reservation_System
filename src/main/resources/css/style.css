@@ -1,48 +1,77 @@
 
+/* =========================================
+   ELITE HOTEL - GLOBAL THEME
+   Colors:
+   Navy  : #102443
+   Gold  : #C99A45
+   Cream : #FCF7F3
+   ========================================= */
+
+
+/* =========================================
+   WELCOME PAGE
+   ========================================= */
+
 /* Main background */
 .welcome-root {
-    -fx-background-color: #FFFDF8;
+    -fx-background-color: #FCF7F3;
+
+    -fx-background-image: url("../images/hotel-building.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+
+    -fx-background-size: 100% 100%;
 }
 
 /* Header */
 .header {
-    -fx-padding: 20 55 10 55;
-    -fx-alignment: CENTER_LEFT;
+    -fx-background-color: transparent;
+    -fx-alignment: center;
 }
 
+/* Home button */
 .home-button {
     -fx-background-color: transparent;
     -fx-text-fill: #102443;
     -fx-font-size: 17px;
     -fx-font-weight: bold;
-    -fx-border-color: transparent transparent #C79A45 transparent;
+
+    -fx-border-color:
+            transparent transparent #C79A45 transparent;
     -fx-border-width: 0 0 3 0;
+
     -fx-cursor: hand;
 }
 
-/* Main text */
+.home-button:hover {
+    -fx-text-fill: #C99A45;
+}
+
+/* Welcome title */
 .welcome-title {
     -fx-font-family: "Georgia";
-    -fx-font-size: 43px;
+    -fx-font-size: 50px;
     -fx-font-weight: bold;
     -fx-text-fill: #102443;
 }
 
+/* Hotel name */
 .hotel-name {
     -fx-font-family: "Georgia";
-    -fx-font-size: 58px;
+    -fx-font-size: 60px;
     -fx-font-style: italic;
     -fx-font-weight: bold;
-    -fx-text-fill: #102443;
+    -fx-text-fill: #C99A45;
 }
 
+/* Welcome description */
 .welcome-description {
     -fx-font-size: 19px;
     -fx-text-fill: #34445A;
     -fx-line-spacing: 5px;
 }
 
-/* Buttons */
+/* Login button on Welcome */
 .login-button {
     -fx-background-color: #102443;
     -fx-text-fill: white;
@@ -50,62 +79,80 @@
     -fx-font-weight: bold;
     -fx-background-radius: 12;
     -fx-cursor: hand;
+    -fx-pref-height: 55px;
 }
 
 .login-button:hover {
     -fx-background-color: #24466F;
 }
 
+/* Register button on Welcome */
 .register-button {
     -fx-background-color: white;
     -fx-text-fill: #102443;
+
     -fx-border-color: #C79A45;
     -fx-border-width: 2;
     -fx-border-radius: 12;
     -fx-background-radius: 12;
+
     -fx-font-size: 19px;
     -fx-font-weight: bold;
     -fx-cursor: hand;
+    -fx-pref-height: 55px;
 }
 
 .register-button:hover {
     -fx-background-color: #FFF2D9;
 }
 
-/* Hotel image */
-.hotel-image {
-    -fx-background-radius: 30;
+/* Welcome ScrollPane */
+.welcome-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.welcome-scroll > .viewport {
+    -fx-background-color: transparent;
 }
 
 
+/* =========================================
+   LOGIN PAGE
+   ========================================= */
 
-/* =========================
-   ELITE HOTEL - LOGIN PAGE
-   ========================= */
 
-.login-root {
-    -fx-background-color: #FFFDF8;
-}
 
-.login-image-panel {
-    -fx-background-color: #E9DFD0;
-}
 
-.login-right-panel {
+
+/* Responsive login ScrollPane */
+.login-scroll {
     -fx-background-color: linear-gradient(
             to bottom right,
             #FFFFFF,
             #FFF9EF
     );
+
+    -fx-background: transparent;
+    -fx-border-color: transparent;
 }
 
+.login-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Login card */
 .login-card {
     -fx-background-color: rgba(255, 255, 255, 0.96);
     -fx-background-radius: 16;
+
     -fx-border-color: #E9E1D5;
     -fx-border-radius: 16;
     -fx-border-width: 1;
-    -fx-padding: 30;
+
+    -fx-padding: 20;
+
     -fx-effect: dropshadow(
             gaussian,
             rgba(35, 31, 25, 0.10),
@@ -113,6 +160,7 @@
     );
 }
 
+/* Login heading */
 .login-heading {
     -fx-font-family: "Georgia";
     -fx-font-size: 19px;
@@ -121,22 +169,26 @@
     -fx-padding: 0 0 10 0;
 }
 
+/* Email and password fields */
 .auth-field {
     -fx-background-color: #FFFFFF;
+
     -fx-border-color: #E4DED4;
     -fx-border-radius: 6;
     -fx-background-radius: 6;
+
     -fx-pref-height: 43;
     -fx-font-size: 13px;
+
     -fx-text-fill: #102443;
     -fx-prompt-text-fill: #9A9389;
+
     -fx-padding: 0 12;
 }
 
-.auth-field:focused {
-    -fx-border-color: #C79A45;
-}
 
+
+/* Show/hide password button */
 .eye-button {
     -fx-background-color: transparent;
     -fx-text-fill: #102443;
@@ -145,6 +197,11 @@
     -fx-pref-height: 43;
 }
 
+.eye-button:hover {
+    -fx-text-fill: #C99A45;
+}
+
+/* Remember Me */
 .remember-check {
     -fx-font-size: 12px;
     -fx-text-fill: #34445A;
@@ -156,10 +213,9 @@
     -fx-border-radius: 3;
 }
 
-.remember-check:selected .box {
-    -fx-background-color: #C79A45;
-}
 
+
+/* Links */
 .link-button {
     -fx-background-color: transparent;
     -fx-text-fill: #B48A3D;
@@ -173,16 +229,20 @@
     -fx-underline: true;
 }
 
+/* Gold login button */
 .gold-button {
     -fx-background-color: linear-gradient(
             to bottom,
             #F1D595,
             #C8953E
     );
+
     -fx-background-radius: 8;
     -fx-text-fill: #102443;
+
     -fx-font-weight: bold;
     -fx-font-size: 15px;
+
     -fx-pref-height: 46;
     -fx-cursor: hand;
 }
@@ -191,8 +251,24 @@
     -fx-background-color: #D5A64F;
 }
 
+/* Login messages */
 .auth-message {
     -fx-text-fill: #A94442;
     -fx-font-size: 12px;
     -fx-alignment: center;
+}
+
+
+.login-root {
+    -fx-background-color: #FCF7F3;
+
+    -fx-background-image: url("../images/reception.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+
+    -fx-background-size: 100% 100%;
+}
+
+.login-right-panel {
+    -fx-background-color: transparent;
 }

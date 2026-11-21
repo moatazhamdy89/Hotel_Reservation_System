@@ -3,11 +3,13 @@ package gui.view.auth;
 
 import gui.navigation.SceneManager;
 
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -16,29 +18,31 @@ public class WelcomeView {
 
     public Parent createView(SceneManager sceneManager) {
 
+        // Main layout
+        BorderPane root = new BorderPane();
+        root.getStyleClass().add("welcome-root");
+
         // Logo
         Image logo = new Image(
-                getClass().getResourceAsStream(
-                        "/images/hotel-logo.png"
-                )
+                getClass().getResourceAsStream("/images/hotel-logo.png")
         );
 
         ImageView logoView = new ImageView(logo);
-        logoView.setFitWidth(190);
         logoView.setPreserveRatio(true);
 
-        // Header: logo on left, Home on right
+        // Home button
         Button homeButton = new Button("Home");
         homeButton.getStyleClass().add("home-button");
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        HBox header = new HBox(20);
-        header.getChildren().addAll(
-                logoView, spacer, homeButton
-        );
+        // Header: logo left, Home exactly centered
+        StackPane header = new StackPane();
         header.getStyleClass().add("header");
+
+        StackPane.setAlignment(logoView, Pos.CENTER_LEFT);
+        StackPane.setAlignment(homeButton, Pos.CENTER);
+
+        header.getChildren().addAll(logoView, homeButton);
+        root.setTop(header);
 
         // Welcome text
         Label welcome = new Label("Welcome to");
@@ -52,20 +56,26 @@ public class WelcomeView {
                         "services, and experience\n" +
                         "true hospitality."
         );
-        description.getStyleClass().add(
-                "welcome-description"
-        );
+        description.getStyleClass().add("welcome-description");
 
         // Buttons
         Button loginButton = new Button("Login");
         loginButton.getStyleClass().add("login-button");
-        loginButton.setPrefSize(280, 55);
+        loginButton.setOnAction(e -> {
+
+            LoginView loginView = new LoginView();
+
+            sceneManager.switchScene(
+                    loginView.createView(sceneManager)
+            );
+
+        });
 
         Button registerButton = new Button("Register");
-        registerButton.getStyleClass().add(
-                "register-button"
-        );
-        registerButton.setPrefSize(280, 55);
+        registerButton.getStyleClass().add("register-button");
+
+        loginButton.setMaxWidth(Double.MAX_VALUE);
+        registerButton.setMaxWidth(Double.MAX_VALUE);
 
         // Login navigation
         loginButton.setOnAction(e -> {
@@ -78,47 +88,86 @@ public class WelcomeView {
 
         // Register will be connected later
 
-        VBox leftContent = new VBox(18);
-        leftContent.getChildren().addAll(
+        VBox buttons = new VBox(12, loginButton, registerButton);
+        buttons.setFillWidth(true);
+        buttons.setMaxWidth(320);
+
+        // Left content
+        VBox leftContent = new VBox(
+                18,
                 welcome,
                 hotelName,
                 description,
-                loginButton,
-                registerButton
+                buttons
         );
 
         leftContent.setAlignment(Pos.CENTER_LEFT);
-        leftContent.setPadding(
-                new Insets(30, 25, 40, 70)
-        );
+        leftContent.setMaxWidth(Region.USE_PREF_SIZE);
 
-        HBox.setHgrow(leftContent, Priority.ALWAYS);
+        // Content container
+        StackPane contentContainer = new StackPane(leftContent);
+        contentContainer.setAlignment(Pos.CENTER_LEFT);
 
-        // Hotel building image
-        Image building = new Image(
-                getClass().getResourceAsStream(
-                        "/images/hotel-building.jpg"
-                )
-        );
+        // Scroll for smaller screens
+        ScrollPane scrollPane = new ScrollPane(contentContainer);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setPannable(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.getStyleClass().add("welcome-scroll");
 
-        ImageView buildingView = new ImageView(building);
-        buildingView.setFitWidth(470);
-        buildingView.setFitHeight(470);
-        buildingView.setPreserveRatio(false);
+        root.setCenter(scrollPane);
 
-        // Main content
-        HBox mainContent = new HBox(15);
-        mainContent.setAlignment(Pos.CENTER);
-        mainContent.getChildren().addAll(
-                leftContent, buildingView
-        );
+        // Responsive resizing
+        root.widthProperty().addListener((obs, oldWidth, newWidth) -> {
 
-        // Full page
-        BorderPane root = new BorderPane();
-        root.setTop(header);
-        root.setCenter(mainContent);
+            double width = newWidth.doubleValue();
+            boolean compact = width < 850;
 
-        root.getStyleClass().add("welcome-root");
+            // Responsive logo size
+            logoView.setFitWidth(
+                    Math.min(350, Math.max(130, width * 0.23))
+            );
+
+            // Responsive horizontal spacing
+            double sidePadding = Math.min(70, Math.max(18, width * 0.05));
+
+            header.setPadding(new Insets(
+                    12, sidePadding, 12, sidePadding
+            ));
+
+            contentContainer.setPadding(new Insets(
+                    25, sidePadding, 30, sidePadding
+            ));
+
+            // Responsive font sizes
+            welcome.setStyle(
+                    "-fx-font-size: " +
+                            Math.min(50, Math.max(27, width * 0.039)) +
+                            "px;"
+            );
+
+            hotelName.setStyle(
+                    "-fx-font-size: " +
+                            Math.min(60, Math.max(34, width * 0.047)) +
+                            "px;"
+            );
+
+            description.setStyle(
+                    "-fx-font-size: " +
+                            Math.min(19, Math.max(14, width * 0.015)) +
+                            "px;"
+            );
+
+            // Responsive button width
+            buttons.setPrefWidth(
+                    Math.min(280, Math.max(180, width * 0.25))
+            );
+
+            // Compact layout
+            leftContent.setSpacing(compact ? 12 : 18);
+        });
 
         return root;
     }

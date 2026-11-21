@@ -16,7 +16,7 @@ public class HotelApplication extends Application {
 
         WelcomeView welcomeView = new WelcomeView();
 
-        sceneManager.switchScene(welcomeView.createView());
+        sceneManager.switchScene(welcomeView.createView(sceneManager));
 
         stage.setTitle("Elite Hotel Reservation System");
     }
