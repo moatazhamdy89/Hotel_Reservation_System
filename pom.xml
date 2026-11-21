@@ -24,6 +24,20 @@
             <version>8.4.0</version>
         </dependency>
 
+        <!-- JavaFX Controls -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>27</version>
+        </dependency>
+
+        <!-- JavaFX FXML -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>27</version>
+        </dependency>
+
         <!-- BCrypt Password Hashing -->
         <dependency>
             <groupId>org.mindrot</groupId>
