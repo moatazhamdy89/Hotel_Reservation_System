@@ -1,0 +1,198 @@
+
+/* Main background */
+.welcome-root {
+    -fx-background-color: #FFFDF8;
+}
+
+/* Header */
+.header {
+    -fx-padding: 20 55 10 55;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.home-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #102443;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-border-color: transparent transparent #C79A45 transparent;
+    -fx-border-width: 0 0 3 0;
+    -fx-cursor: hand;
+}
+
+/* Main text */
+.welcome-title {
+    -fx-font-family: "Georgia";
+    -fx-font-size: 43px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #102443;
+}
+
+.hotel-name {
+    -fx-font-family: "Georgia";
+    -fx-font-size: 58px;
+    -fx-font-style: italic;
+    -fx-font-weight: bold;
+    -fx-text-fill: #102443;
+}
+
+.welcome-description {
+    -fx-font-size: 19px;
+    -fx-text-fill: #34445A;
+    -fx-line-spacing: 5px;
+}
+
+/* Buttons */
+.login-button {
+    -fx-background-color: #102443;
+    -fx-text-fill: white;
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+}
+
+.login-button:hover {
+    -fx-background-color: #24466F;
+}
+
+.register-button {
+    -fx-background-color: white;
+    -fx-text-fill: #102443;
+    -fx-border-color: #C79A45;
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.register-button:hover {
+    -fx-background-color: #FFF2D9;
+}
+
+/* Hotel image */
+.hotel-image {
+    -fx-background-radius: 30;
+}
+
+
+
+/* =========================
+   ELITE HOTEL - LOGIN PAGE
+   ========================= */
+
+.login-root {
+    -fx-background-color: #FFFDF8;
+}
+
+.login-image-panel {
+    -fx-background-color: #E9DFD0;
+}
+
+.login-right-panel {
+    -fx-background-color: linear-gradient(
+            to bottom right,
+            #FFFFFF,
+            #FFF9EF
+    );
+}
+
+.login-card {
+    -fx-background-color: rgba(255, 255, 255, 0.96);
+    -fx-background-radius: 16;
+    -fx-border-color: #E9E1D5;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-padding: 30;
+    -fx-effect: dropshadow(
+            gaussian,
+            rgba(35, 31, 25, 0.10),
+            18, 0.15, 0, 5
+    );
+}
+
+.login-heading {
+    -fx-font-family: "Georgia";
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #102443;
+    -fx-padding: 0 0 10 0;
+}
+
+.auth-field {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E4DED4;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-pref-height: 43;
+    -fx-font-size: 13px;
+    -fx-text-fill: #102443;
+    -fx-prompt-text-fill: #9A9389;
+    -fx-padding: 0 12;
+}
+
+.auth-field:focused {
+    -fx-border-color: #C79A45;
+}
+
+.eye-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #102443;
+    -fx-cursor: hand;
+    -fx-font-size: 17px;
+    -fx-pref-height: 43;
+}
+
+.remember-check {
+    -fx-font-size: 12px;
+    -fx-text-fill: #34445A;
+}
+
+.remember-check .box {
+    -fx-border-color: #C79A45;
+    -fx-background-color: #FFFFFF;
+    -fx-border-radius: 3;
+}
+
+.remember-check:selected .box {
+    -fx-background-color: #C79A45;
+}
+
+.link-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #B48A3D;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 3;
+}
+
+.link-button:hover {
+    -fx-underline: true;
+}
+
+.gold-button {
+    -fx-background-color: linear-gradient(
+            to bottom,
+            #F1D595,
+            #C8953E
+    );
+    -fx-background-radius: 8;
+    -fx-text-fill: #102443;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-pref-height: 46;
+    -fx-cursor: hand;
+}
+
+.gold-button:hover {
+    -fx-background-color: #D5A64F;
+}
+
+.auth-message {
+    -fx-text-fill: #A94442;
+    -fx-font-size: 12px;
+    -fx-alignment: center;
+}
