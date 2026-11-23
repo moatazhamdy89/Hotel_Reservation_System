@@ -151,6 +151,12 @@ public class LoginView {
 
         registerRow.setAlignment(Pos.CENTER);
 
+        registerButton.setOnAction(e ->
+                sceneManager.switchScene(
+                        new RegisterView().createView(sceneManager)
+                )
+        );
+
         // Login card
         VBox card = new VBox(
                 14,

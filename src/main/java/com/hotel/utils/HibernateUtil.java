@@ -52,7 +52,7 @@ public class HibernateUtil {
 
                 .setProperty(
                         "hibernate.connection.url",
-                        "jdbc:mysql://10.29.214.187/hotel_reservation_system")
+                        "jdbc:mysql://localhost/hotel_reservation_system")
 
                 .setProperty(
                         "hibernate.connection.username",

@@ -16,7 +16,7 @@ public class HotelApplication extends Application {
 
         WelcomeView welcomeView = new WelcomeView();
 
-        sceneManager.switchScene(welcomeView.createView(sceneManager));
+        sceneManager.switchToFXML("/fxml/auth/welcome.fxml");
 
         stage.setTitle("Elite Hotel Reservation System");
     }
