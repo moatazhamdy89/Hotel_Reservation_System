@@ -41,8 +41,14 @@ public class SceneManager {
 
             Object controller = loader.getController();
 
+
             if (controller instanceof gui.controller.auth.WelcomeController) {
                 ((gui.controller.auth.WelcomeController) controller)
+                        .setSceneManager(this);
+            }
+
+            if (controller instanceof gui.controller.auth.LoginController) {
+                ((gui.controller.auth.LoginController) controller)
                         .setSceneManager(this);
             }
 

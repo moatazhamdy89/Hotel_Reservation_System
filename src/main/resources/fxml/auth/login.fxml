@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/26"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="root"
+           fx:controller="gui.controller.auth.LoginController"
+           prefWidth="1050"
+           prefHeight="650"
+           styleClass="login-root"
+           stylesheets="@../../css/style.css">
+
+    <children>
+
+        <!-- Background -->
+        <ImageView fx:id="background"
+                   preserveRatio="false">
+            <image>
+                <Image url="@../../images/reception.png"/>
+            </image>
+        </ImageView>
+
+        <!-- Right panel -->
+        <VBox alignment="CENTER"
+              spacing="25"
+              maxWidth="500"
+              styleClass="login-right-panel"
+              StackPane.alignment="CENTER_RIGHT">
+
+            <padding>
+                <Insets top="30" right="30" bottom="30" left="30"/>
+            </padding>
+
+            <!-- Logo -->
+            <ImageView fitWidth="180"
+                       preserveRatio="true">
+                <image>
+                    <Image url="@../../images/hotel-logo.png"/>
+                </image>
+            </ImageView>
+
+            <!-- Login card -->
+            <VBox spacing="14"
+                  fillWidth="true"
+                  maxWidth="420"
+                  styleClass="login-card">
+
+                <Label text="Login to Your Account"
+                       wrapText="true"
+                       styleClass="login-heading"/>
+
+                <TextField fx:id="emailField"
+                           promptText="✉   Email"
+                           maxWidth="Infinity"
+                           styleClass="auth-field"/>
+
+                <!-- Password row -->
+                <HBox alignment="CENTER" spacing="5">
+
+                    <StackPane HBox.hgrow="ALWAYS">
+
+                        <PasswordField fx:id="passwordField"
+                                       promptText="🔒   Password"
+                                       maxWidth="Infinity"
+                                       styleClass="auth-field"/>
+
+                        <TextField fx:id="visiblePassword"
+                                   promptText="🔒   Password"
+                                   maxWidth="Infinity"
+                                   visible="false"
+                                   managed="false"
+                                   styleClass="auth-field"/>
+
+                    </StackPane>
+
+                    <Button fx:id="showPassword"
+                            styleClass="eye-button"
+                            onAction="#togglePassword">
+
+                        <graphic>
+                            <ImageView fx:id="eyeIcon"
+                                       fitWidth="20"
+                                       fitHeight="20"
+                                       preserveRatio="true">
+                                <image>
+                                    <Image url="@../../images/eye-off.png"/>
+                                </image>
+                            </ImageView>
+                        </graphic>
+
+                    </Button>
+
+                </HBox>
+
+                <!-- Login -->
+                <Button fx:id="loginButton"
+                        text="Login"
+                        maxWidth="Infinity"
+                        styleClass="gold-button"
+                        onAction="#handleLogin"/>
+
+                <Label fx:id="message"
+                       wrapText="true"
+                       styleClass="auth-message"/>
+
+                <!-- Register -->
+                <HBox alignment="CENTER" spacing="5">
+
+                    <Label text="Don't have an account?"/>
+
+                    <Button text="Register"
+                            styleClass="link-button"
+                            onAction="#openRegister"/>
+
+                </HBox>
+
+            </VBox>
+
+        </VBox>
+
+    </children>
+
+</StackPane>

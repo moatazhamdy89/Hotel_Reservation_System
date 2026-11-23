@@ -85,9 +85,7 @@ public class WelcomeController {
 
     @FXML
     private void openLogin() {
-        sceneManager.switchScene(
-                new LoginView().createView(sceneManager)
-        );
+        sceneManager.switchToFXML("/fxml/auth/login.fxml");
     }
 
     @FXML
