@@ -77,6 +77,12 @@ public class WelcomeView {
         loginButton.setMaxWidth(Double.MAX_VALUE);
         registerButton.setMaxWidth(Double.MAX_VALUE);
 
+        registerButton.setOnAction(e -> {
+            sceneManager.switchScene(
+                    new RegisterView().createView(sceneManager)
+            );
+        });
+
         // Login navigation
         loginButton.setOnAction(e -> {
             LoginView loginView = new LoginView();

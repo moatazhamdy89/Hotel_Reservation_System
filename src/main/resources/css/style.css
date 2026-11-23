@@ -274,15 +274,66 @@
 }
 
 
-.eye-button {
+/* Registration Page */
+
+.register-scroll {
     -fx-background-color: transparent;
+    -fx-background: transparent;
     -fx-border-color: transparent;
-    -fx-padding: 8;
-    -fx-cursor: hand;
-    -fx-alignment: center;
 }
 
-.eye-button:hover {
-    -fx-background-color: #FCF7F3;
+.register-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.register-card {
+    -fx-background-color: rgba(255, 253, 249, 0.96);
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: #E5DED3;
+    -fx-padding: 25;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 15, 0.15, 0, 4);
+}
+
+.register-title {
+    -fx-font-family: "Georgia";
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #102443;
+}
+
+.register-field {
+    -fx-pref-height: 42;
+    -fx-background-color: #FFFFFF;
     -fx-background-radius: 8;
+    -fx-border-color: #D5D5D5;
+    -fx-border-radius: 8;
+    -fx-font-size: 13px;
+}
+
+.register-field:focused {
+    -fx-border-color: #C99639;
+}
+
+.register-button {
+    -fx-background-color: linear-gradient(to bottom, #F5D58A, #C58B29);
+    -fx-background-radius: 9;
+    -fx-text-fill: #102443;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-pref-height: 45;
+    -fx-cursor: hand;
+}
+
+.register-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #B98224;
+    -fx-font-weight: bold;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.register-message {
+    -fx-text-fill: #B3261E;
+    -fx-font-size: 12px;
 }

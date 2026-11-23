@@ -44,4 +44,6 @@ public final class Validation {
     public static boolean isStrongPassword(String password, String email) {
         return passwordProblems(password, email).isEmpty();
     }
+
+
 }

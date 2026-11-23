@@ -1,9 +1,12 @@
 
 package gui.navigation;
 
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class SceneManager {
 
@@ -25,5 +28,28 @@ public class SceneManager {
 
         stage.setScene(scene);
         stage.show();
+    }
+
+    public void switchToFXML(String fxmlPath) {
+
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource(fxmlPath)
+            );
+
+            Parent root = loader.load();
+
+            Object controller = loader.getController();
+
+            if (controller instanceof gui.controller.auth.WelcomeController) {
+                ((gui.controller.auth.WelcomeController) controller)
+                        .setSceneManager(this);
+            }
+
+            switchScene(root);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load FXML: " + fxmlPath, e);
+        }
     }
 }
