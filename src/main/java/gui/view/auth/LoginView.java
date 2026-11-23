@@ -2,7 +2,6 @@
 package gui.view.auth;
 
 import com.hotel.model.User;
-import gui.controller.auth.LoginController;
 import gui.navigation.SceneManager;
 
 import javafx.concurrent.Task;
