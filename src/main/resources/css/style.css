@@ -337,3 +337,7 @@
     -fx-text-fill: #B3261E;
     -fx-font-size: 12px;
 }
+.field-error {
+    -fx-text-fill: #c62828;
+    -fx-font-size: 11px;
+}

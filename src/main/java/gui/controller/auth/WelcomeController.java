@@ -92,8 +92,6 @@ public class WelcomeController {
 
     @FXML
     private void openRegister() {
-        sceneManager.switchScene(
-                new RegisterView().createView(sceneManager)
-        );
+        sceneManager.switchToFXML("/fxml/auth/register.fxml");
     }
 }

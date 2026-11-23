@@ -45,7 +45,10 @@ public class SceneManager {
                 ((gui.controller.auth.WelcomeController) controller)
                         .setSceneManager(this);
             }
-
+            if (controller instanceof gui.controller.auth.RegisterController) {
+                ((gui.controller.auth.RegisterController) controller)
+                        .setSceneManager(this);
+            }
             switchScene(root);
 
         } catch (IOException e) {
