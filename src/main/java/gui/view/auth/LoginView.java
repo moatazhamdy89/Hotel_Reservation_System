@@ -62,9 +62,9 @@ public class LoginView {
         passwordField.getStyleClass().add("auth-field");
         passwordField.setMaxWidth(Double.MAX_VALUE);
 
-        // Show / hide password
+        // Visible password
         TextField visiblePassword = new TextField();
-        visiblePassword.setPromptText("Password");
+        visiblePassword.setPromptText("🔒   Password");
         visiblePassword.getStyleClass().add("auth-field");
         visiblePassword.setMaxWidth(Double.MAX_VALUE);
 
@@ -75,10 +75,25 @@ public class LoginView {
         visiblePassword.setVisible(false);
         visiblePassword.setManaged(false);
 
-        Button showPassword = new Button("◉");
+        // Eye icon - initially hidden password
+        ImageView eyeIcon = new ImageView(
+                new Image(getClass().getResourceAsStream(
+                        "/images/eye-off.png"
+                ))
+        );
+
+        eyeIcon.setFitWidth(20);
+        eyeIcon.setFitHeight(20);
+        eyeIcon.setPreserveRatio(true);
+
+        // Eye button
+        Button showPassword = new Button();
+        showPassword.setGraphic(eyeIcon);
         showPassword.getStyleClass().add("eye-button");
 
+        // Show / Hide password
         showPassword.setOnAction(e -> {
+
             boolean show = !visiblePassword.isVisible();
 
             visiblePassword.setVisible(show);
@@ -86,8 +101,17 @@ public class LoginView {
 
             passwordField.setVisible(!show);
             passwordField.setManaged(!show);
+
+            String iconPath = show
+                    ? "/images/eye.png"
+                    : "/images/eye-off.png";
+
+            eyeIcon.setImage(new Image(
+                    getClass().getResourceAsStream(iconPath)
+            ));
         });
 
+        // Password container
         StackPane passwordBox = new StackPane(
                 passwordField,
                 visiblePassword
@@ -95,10 +119,14 @@ public class LoginView {
 
         passwordBox.setMaxWidth(Double.MAX_VALUE);
 
-        HBox passwordRow = new HBox(5, passwordBox, showPassword);
+        HBox passwordRow = new HBox(
+                5,
+                passwordBox,
+                showPassword
+        );
+
         HBox.setHgrow(passwordBox, Priority.ALWAYS);
-
-
+        passwordRow.setAlignment(Pos.CENTER);
 
         // Login button
         Button loginButton = new Button("Login");
@@ -111,12 +139,16 @@ public class LoginView {
 
         // Register
         Label registerText = new Label("Don't have an account?");
+
         Button registerButton = new Button("Register");
         registerButton.getStyleClass().add("link-button");
 
         HBox registerRow = new HBox(
-                5, registerText, registerButton
+                5,
+                registerText,
+                registerButton
         );
+
         registerRow.setAlignment(Pos.CENTER);
 
         // Login card
@@ -135,7 +167,6 @@ public class LoginView {
         card.setMaxWidth(420);
 
         // Login event
-
         loginButton.setOnAction(e -> {
 
             String email = emailField.getText().trim();
@@ -161,6 +192,7 @@ public class LoginView {
                 if (user == null) {
                     message.setText("Invalid email or password.");
                 } else {
+
                     passwordField.clear();
 
                     message.setText(
@@ -182,7 +214,6 @@ public class LoginView {
             thread.setDaemon(true);
             thread.start();
         });
-
 
         // Right panel
         VBox rightPanel = new VBox(25, logo, card);

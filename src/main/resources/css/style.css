@@ -272,3 +272,17 @@
 .login-right-panel {
     -fx-background-color: transparent;
 }
+
+
+.eye-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 8;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+}
+
+.eye-button:hover {
+    -fx-background-color: #FCF7F3;
+    -fx-background-radius: 8;
+}
