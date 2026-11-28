@@ -3,6 +3,7 @@ package gui.controller.auth;
 
 import com.hotel.manager.UserManager;
 import com.hotel.model.User;
+import com.hotel.model.Guest;
 import gui.navigation.SceneManager;
 
 import javafx.concurrent.Task;
@@ -115,10 +116,26 @@ public class LoginController {
 
             if (user == null) {
                 message.setText("Invalid email or password.");
+                return;
+            }
+
+            passwordField.clear();
+            message.setText("");
+
+            // Check user type
+            if (user instanceof Guest guest) {
+
+                if (sceneManager == null) {
+                    message.setText("Navigation error.");
+                    return;
+                }
+
+                // Open Guest Home
+                sceneManager.openGuestHome(guest);
+
             } else {
 
-                passwordField.clear();
-
+                // Employee navigation will be added later
                 message.setText(
                         "Welcome, " + user.getFirstName()
                                 + "! Role: " + user.getRole()
@@ -141,9 +158,6 @@ public class LoginController {
 
     @FXML
     private void openRegister() {
-
-        System.out.println("Register button clicked!");
-        System.out.println("SceneManager: " + sceneManager);
 
         if (sceneManager == null) {
             message.setText("Navigation error. Please try again.");

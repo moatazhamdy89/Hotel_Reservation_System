@@ -96,16 +96,31 @@
                          -fx-background-color:#F8F7F4;">
 
                 <!-- PAGE HEADER -->
-                <VBox spacing="5">
+                <VBox spacing="8">
+
+                    <Label fx:id="welcomeLabel"
+                           text="Welcome!"
+                           wrapText="true"
+                           style="-fx-text-fill:#102344;
+                  -fx-font-size:30px;
+                  -fx-font-weight:bold;"/>
+
+                    <Label text="Enjoy your stay at Elite Hotel."
+                           style="-fx-text-fill:#687180;
+                  -fx-font-size:14px;"/>
+
+                    <Separator/>
 
                     <Label text="Book a Room"
                            style="-fx-text-fill:#102344;
-                                  -fx-font-size:30px;
-                                  -fx-font-weight:bold;"/>
+                  -fx-font-size:24px;
+                  -fx-font-weight:bold;"/>
 
                     <Label text="Explore our rooms, then reserve the type you love."
+                           wrapText="true"
                            style="-fx-text-fill:#687180;
-                                  -fx-font-size:14px;"/>
+                  -fx-font-size:14px;"/>
+
                 </VBox>
 
                 <!-- MATCHING FILTERS -->
