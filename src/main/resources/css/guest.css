@@ -1,0 +1,92 @@
+
+.guest-nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #F5F5F5;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 15 0 18;
+    -fx-cursor: hand;
+}
+
+.guest-nav-button:hover {
+    -fx-background-color: #203A60;
+    -fx-background-radius: 10;
+}
+
+.filter-label {
+    -fx-text-fill: #102344;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.guest-room-card {
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-padding: 15;
+    -fx-border-color: #EAE6DF;
+    -fx-border-radius: 14;
+    -fx-effect: dropshadow(
+            gaussian, rgba(0,0,0,0.07), 12, 0, 0, 3
+    );
+}
+
+.room-image-placeholder {
+    -fx-background-color: #EAE3D7;
+    -fx-background-radius: 10;
+}
+
+.room-image-label {
+    -fx-text-fill: #8B806F;
+    -fx-font-size: 13px;
+}
+
+.room-title {
+    -fx-text-fill: #102344;
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+}
+
+.room-description {
+    -fx-text-fill: #777777;
+    -fx-font-size: 12px;
+}
+
+.room-details {
+    -fx-text-fill: #555555;
+    -fx-font-size: 12px;
+}
+
+.room-features {
+    -fx-text-fill: #52647A;
+    -fx-font-size: 12px;
+}
+
+.room-price {
+    -fx-text-fill: #B17B25;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.reserve-button {
+    -fx-background-color:
+            linear-gradient(#F8D992, #D69B39);
+    -fx-text-fill: #102344;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 9;
+    -fx-cursor: hand;
+}
+
+.reserve-button:hover {
+    -fx-background-color:
+            linear-gradient(#FFE5AB, #E5AD4B);
+}
+
+.date-picker,
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #D8DDE3;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}

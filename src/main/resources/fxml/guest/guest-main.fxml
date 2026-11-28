@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="gui.controller.guest.GuestMainController"
+            prefWidth="1050"
+            prefHeight="650"
+            stylesheets="@/css/guest.css"            style="-fx-background-color:#F8F7F4;">
+
+    <!-- SIDEBAR -->
+    <left>
+        <VBox prefWidth="210"
+              spacing="12"
+              style="-fx-background-color:#102344;
+                     -fx-padding:25 12 20 12;">
+
+            <!-- HOTEL LOGO -->
+            <VBox alignment="CENTER"
+                  spacing="5"
+                  style="-fx-padding:0 0 25 0;">
+
+                <Label text="♛"
+                       style="-fx-text-fill:#E6B75C;
+                              -fx-font-size:42px;"/>
+
+                <Label text="Elite Hotel"
+                       style="-fx-text-fill:white;
+                              -fx-font-size:25px;
+                              -fx-font-family:Georgia;
+                              -fx-font-style:italic;
+                              -fx-font-weight:bold;"/>
+            </VBox>
+
+            <!-- NAVIGATION -->
+            <Button text="▣   Book a Room"
+                    maxWidth="Infinity"
+                    prefHeight="43"
+                    style="-fx-background-color:linear-gradient(#F8D992,#D69B39);
+                           -fx-text-fill:#102344;
+                           -fx-font-size:14px;
+                           -fx-font-weight:bold;
+                           -fx-background-radius:10;"/>
+
+            <Button text="▤   My Reservations"
+                    maxWidth="Infinity"
+                    prefHeight="42"
+                    styleClass="guest-nav-button"/>
+
+            <Button text="▤   My Invoices"
+                    maxWidth="Infinity"
+                    prefHeight="42"
+                    styleClass="guest-nav-button"/>
+
+            <Button text="♧   Services"
+                    maxWidth="Infinity"
+                    prefHeight="42"
+                    styleClass="guest-nav-button"/>
+
+            <Button text="▣   Events"
+                    maxWidth="Infinity"
+                    prefHeight="42"
+                    styleClass="guest-nav-button"/>
+
+            <Button text="☆   Reviews"
+                    maxWidth="Infinity"
+                    prefHeight="42"
+                    styleClass="guest-nav-button"/>
+
+            <Button text="♙   My Profile"
+                    maxWidth="Infinity"
+                    prefHeight="42"
+                    styleClass="guest-nav-button"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Separator/>
+
+            <Button text="⇥   Logout"
+                    maxWidth="Infinity"
+                    prefHeight="42"
+                    styleClass="guest-nav-button"/>
+
+        </VBox>
+    </left>
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <ScrollPane fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    style="-fx-background:#F8F7F4;
+                           -fx-background-color:transparent;">
+
+            <VBox spacing="24"
+                  style="-fx-padding:30;
+                         -fx-background-color:#F8F7F4;">
+
+                <!-- PAGE HEADER -->
+                <VBox spacing="5">
+
+                    <Label text="Book a Room"
+                           style="-fx-text-fill:#102344;
+                                  -fx-font-size:30px;
+                                  -fx-font-weight:bold;"/>
+
+                    <Label text="Explore our rooms, then reserve the type you love."
+                           style="-fx-text-fill:#687180;
+                                  -fx-font-size:14px;"/>
+                </VBox>
+
+                <!-- MATCHING FILTERS -->
+                <HBox spacing="12"
+                      alignment="BOTTOM_LEFT">
+
+                    <VBox spacing="7"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Check-in Date"
+                               styleClass="filter-label"/>
+
+                        <DatePicker fx:id="checkInPicker"
+                                    maxWidth="Infinity"
+                                    prefHeight="40"/>
+                    </VBox>
+
+                    <VBox spacing="7"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Check-out Date"
+                               styleClass="filter-label"/>
+
+                        <DatePicker fx:id="checkOutPicker"
+                                    maxWidth="Infinity"
+                                    prefHeight="40"/>
+                    </VBox>
+
+                    <VBox spacing="7"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Room Type"
+                               styleClass="filter-label"/>
+
+                        <ComboBox fx:id="roomTypeCombo"
+                                  maxWidth="Infinity"
+                                  prefHeight="40"/>
+                    </VBox>
+
+                    <VBox spacing="7"
+                          prefWidth="85">
+
+                        <Label text="Guests"
+                               styleClass="filter-label"/>
+
+                        <ComboBox fx:id="guestsCombo"
+                                  maxWidth="Infinity"
+                                  prefHeight="40"/>
+                    </VBox>
+
+                    <Button fx:id="searchButton"
+                            text="Find Match"
+                            onAction="#findMatches"
+                            prefWidth="120"
+                            prefHeight="40"
+                            style="-fx-background-color:#102344;
+                                   -fx-text-fill:white;
+                                   -fx-font-size:14px;
+                                   -fx-font-weight:bold;
+                                   -fx-background-radius:10;"/>
+                </HBox>
+
+                <!-- ROOMS HEADER -->
+                <HBox spacing="12"
+                      alignment="CENTER_LEFT">
+
+                    <Label text="Explore Our Rooms"
+                           style="-fx-text-fill:#102344;
+                                  -fx-font-size:21px;
+                                  -fx-font-weight:bold;"/>
+
+                    <Button text="Show All Rooms"
+                            onAction="#showAllRooms"/>
+                </HBox>
+
+                <!-- STATUS MESSAGE -->
+                <Label fx:id="statusLabel"
+                       wrapText="true"
+                       style="-fx-text-fill:#687180;"/>
+
+                <!-- DYNAMIC ROOM CARDS -->
+                <VBox fx:id="roomsContainer"
+                      spacing="16"
+                      fillWidth="true"/>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

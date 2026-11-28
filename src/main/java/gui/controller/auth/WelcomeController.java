@@ -2,8 +2,6 @@
 package gui.controller.auth;
 
 import gui.navigation.SceneManager;
-import gui.view.auth.LoginView;
-import gui.view.auth.RegisterView;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -74,10 +72,6 @@ public class WelcomeController {
                                     "px;"
                     );
 
-                    buttons.setPrefWidth(
-                            Math.min(280, Math.max(180, width * 0.25))
-                    );
-
                     leftContent.setSpacing(compact ? 12 : 18);
                 }
         );
@@ -85,9 +79,7 @@ public class WelcomeController {
 
     @FXML
     private void openLogin() {
-        sceneManager.switchScene(
-                new LoginView().createView(sceneManager)
-        );
+        sceneManager.switchToFXML("/fxml/auth/login.fxml");
     }
 
     @FXML

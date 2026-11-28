@@ -1,6 +1,10 @@
 
 package gui.navigation;
 
+import gui.controller.auth.WelcomeController;
+import gui.controller.auth.LoginController;
+import gui.controller.auth.RegisterController;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -41,18 +45,30 @@ public class SceneManager {
 
             Object controller = loader.getController();
 
-            if (controller instanceof gui.controller.auth.WelcomeController) {
-                ((gui.controller.auth.WelcomeController) controller)
+            // Welcome Controller
+            if (controller instanceof WelcomeController) {
+                ((WelcomeController) controller)
                         .setSceneManager(this);
             }
-            if (controller instanceof gui.controller.auth.RegisterController) {
-                ((gui.controller.auth.RegisterController) controller)
+
+            // Login Controller
+            if (controller instanceof LoginController) {
+                ((LoginController) controller)
                         .setSceneManager(this);
             }
+
+            // Register Controller
+            if (controller instanceof RegisterController) {
+                ((RegisterController) controller)
+                        .setSceneManager(this);
+            }
+
             switchScene(root);
 
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load FXML: " + fxmlPath, e);
+            throw new RuntimeException(
+                    "Failed to load FXML: " + fxmlPath, e
+            );
         }
     }
 }

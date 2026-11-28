@@ -196,7 +196,7 @@ public class RegisterController {
             alert.setContentText("You can now log in.");
             alert.showAndWait();
 
-            sceneManager.switchToFXML("/fxml/auth/login.fxml");
+            sceneManager.switchToFXML("/fxml/fxml/auth/login.fxml");
         });
 
         task.setOnFailed(event -> {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
@@ -8,19 +9,12 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane fx:id="root" prefHeight="650" prefWidth="1050" styleClass="welcome-root" stylesheets="@../../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.auth.WelcomeController">
 
     <top>
-        <StackPane fx:id="header" styleClass="header">
-
-            <ImageView fx:id="logoView" fitWidth="240" preserveRatio="true" StackPane.alignment="CENTER_LEFT">
-                <image>
-                    <Image url="@../../images/hotel-logo.png" />
-                </image>
-            </ImageView>
-
-        </StackPane>
+        <StackPane fx:id="header" styleClass="header" />
     </top>
 
     <center>
@@ -29,21 +23,33 @@
             <content>
                 <StackPane fx:id="contentContainer" alignment="CENTER_LEFT">
 
-                    <VBox fx:id="leftContent" alignment="CENTER_LEFT" maxWidth="-Infinity" spacing="18">
+                    <VBox fx:id="leftContent" alignment="CENTER_LEFT" maxWidth="-Infinity" prefHeight="646.0" prefWidth="366.0" spacing="18">
+         
+                     <ImageView fx:id="logoView" fitHeight="169.0" fitWidth="252.0" preserveRatio="true">
+                         <image>
+                             <Image url="@../../images/hotel-logo.png" />
+                         </image>
+                     </ImageView>
 
                         <Label fx:id="welcome" styleClass="welcome-title" text="Welcome to" />
 
-                        <Label fx:id="hotelName" styleClass="hotel-name" text="Elite Hotel" />
+                        <Label fx:id="hotelName" prefHeight="50.0" prefWidth="340.0" styleClass="hotel-name" text="Elite Hotel">
+                     <font>
+                        <Font size="10.0" />
+                     </font></Label>
 
                         <Label fx:id="description" styleClass="welcome-description" text="Book your stay, enjoy premium&#10;services, and experience&#10;true hospitality." />
 
-                        <VBox fx:id="buttons" alignment="CENTER_LEFT" fillWidth="true" maxWidth="320" prefHeight="86.0" prefWidth="276.0" spacing="12">
+                        <VBox fx:id="buttons" alignment="CENTER_LEFT" fillWidth="true" maxWidth="320" prefHeight="100.0" prefWidth="243.0" spacing="12">
 
-                            <Button maxWidth="Infinity" onAction="#openLogin" prefHeight="36.0" prefWidth="307.0" styleClass="login-button" text="Login" />
+                            <Button onAction="#openLogin" prefHeight="46.0" prefWidth="250.0" styleClass="login-button" text="Login" />
 
-                            <Button maxWidth="Infinity" onAction="#openRegister" prefHeight="36.0" prefWidth="307.0" styleClass="register-button" text="Register" />
+                            <Button onAction="#openRegister" prefHeight="42.0" prefWidth="250.0" styleClass="register-button" text="Register" />
 
                         </VBox>
+                  <StackPane.margin>
+                     <Insets left="20.0" />
+                  </StackPane.margin>
 
                     </VBox>
 

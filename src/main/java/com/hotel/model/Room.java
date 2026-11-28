@@ -99,4 +99,8 @@ public abstract class Room {
     public RoomStatus getStatus() {
         return status;
     }
+
+    public String getDescription() {
+        return description;
+    }
 }

@@ -1,3 +1,4 @@
+
 package gui.controller.auth;
 
 import com.hotel.manager.UserManager;
@@ -45,12 +46,11 @@ public class LoginController {
         );
     }
 
-    // Existing login logic - unchanged
+    // Login logic
     public User login(String email, String password) {
 
-        if (email == null || password == null){
-            email.isBlank();
-            password.isBlank();
+        if (email == null || password == null
+                || email.isBlank() || password.isBlank()) {
             return null;
         }
 
@@ -141,6 +141,15 @@ public class LoginController {
 
     @FXML
     private void openRegister() {
+
+        System.out.println("Register button clicked!");
+        System.out.println("SceneManager: " + sceneManager);
+
+        if (sceneManager == null) {
+            message.setText("Navigation error. Please try again.");
+            return;
+        }
+
         sceneManager.switchToFXML("/fxml/auth/register.fxml");
     }
 }

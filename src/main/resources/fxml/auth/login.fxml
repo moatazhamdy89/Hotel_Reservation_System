@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane fx:id="root" prefHeight="650" prefWidth="1050" styleClass="login-root" stylesheets="@../../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.auth.LoginController">
+
+    <children>
+
+        <!-- Background -->
+        <ImageView fx:id="background" preserveRatio="false">
+            <image>
+                <Image url="@../../images/reception.png" />
+            </image>
+        </ImageView>
+
+        <!-- Right panel -->
+        <VBox alignment="CENTER" maxWidth="713.0" prefHeight="941.0" prefWidth="713.0" spacing="25" styleClass="login-right-panel" StackPane.alignment="CENTER_RIGHT">
+
+            <padding>
+                <Insets bottom="30" left="30" right="30" top="30" />
+            </padding>
+
+               <!-- Logo -->
+            <ImageView fitWidth="150.0" preserveRatio="true" VBox.vgrow="SOMETIMES">
+                <image>
+                    <Image url="@../../images/hotel-logo.png" />
+                </image>
+            <VBox.margin>
+               <Insets />
+            </VBox.margin>
+            <viewport>
+               <Rectangle2D minX="562.0" width="15.0" />
+            </viewport>
+            </ImageView>
+
+            <!-- Login card -->
+            <VBox fillWidth="true" maxWidth="541.0" prefHeight="386.0" prefWidth="541.0" spacing="14" styleClass="login-card">
+
+                <Label styleClass="login-heading" text="Login to Your Account" wrapText="true" />
+
+                <TextField fx:id="emailField" maxWidth="Infinity" prefHeight="62.0" prefWidth="499.0" promptText="✉   Email" styleClass="auth-field" />
+
+                <!-- Password row -->
+                <HBox alignment="CENTER" spacing="5">
+
+                    <StackPane HBox.hgrow="ALWAYS">
+
+                        <PasswordField fx:id="passwordField" maxWidth="Infinity" prefHeight="71.0" prefWidth="499.0" promptText="🔒   Password" styleClass="auth-field" />
+
+                        <TextField fx:id="visiblePassword" managed="false" maxWidth="Infinity" promptText="🔒   Password" styleClass="auth-field" visible="false" />
+                         <ImageView fx:id="eyeIcon" fitHeight="20.0" fitWidth="21.0" preserveRatio="true" StackPane.alignment="CENTER_RIGHT">
+                             <image>
+                                 <Image url="@../../images/eye-off.png" />
+                             </image>
+                     <StackPane.margin>
+                        <Insets right="30.0" />
+                     </StackPane.margin>
+                         </ImageView>
+
+                    </StackPane>
+
+                </HBox>
+
+                <Label fx:id="message" styleClass="auth-message" wrapText="true" />
+
+                <!-- Login -->
+                <Button fx:id="loginButton" maxWidth="Infinity" onAction="#handleLogin" styleClass="gold-button" text="Login" />
+
+                <!-- Register -->
+                <HBox alignment="CENTER" prefHeight="70.0" prefWidth="499.0" spacing="5">
+   
+                    <Label text="Don't have an account?" />
+
+                    <Button onAction="#openRegister" styleClass="link-button" text="Register" />
+
+                </HBox>
+
+            </VBox>
+         <StackPane.margin>
+            <Insets right="70.0" />
+         </StackPane.margin>
+
+        </VBox>
+
+    </children>
+
+</StackPane>
