@@ -189,6 +189,7 @@ public class RegisterController {
 
         task.setOnSucceeded(event -> {
             registerButton.setDisable(false);
+            message.setText("");
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Registration Successful");
@@ -196,7 +197,7 @@ public class RegisterController {
             alert.setContentText("You can now log in.");
             alert.showAndWait();
 
-            sceneManager.switchToFXML("/fxml/fxml/auth/login.fxml");
+            openLogin();
         });
 
         task.setOnFailed(event -> {

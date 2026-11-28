@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import gui.navigation.SceneManager;
 
 public class GuestMainController {
 
@@ -26,6 +27,11 @@ public class GuestMainController {
     @FXML private Button searchButton;
     @FXML private VBox roomsContainer;
     @FXML private Label statusLabel;
+    @FXML private Label welcomeLabel;
+
+    private SceneManager sceneManager;
+
+    private Guest currentGuest;
 
     private final RoomManager roomManager = new RoomManager();
 
@@ -33,6 +39,27 @@ public class GuestMainController {
 
     private static final BigDecimal MAX_PRICE =
             new BigDecimal("9999999999.99");
+
+    public void setSceneManager(SceneManager sceneManager) {
+        this.sceneManager = sceneManager;
+    }
+
+    public void setGuest(Guest guest) {
+
+        this.currentGuest = guest;
+
+        if (guest != null) {
+
+            welcomeLabel.setText(
+                    "Welcome, " + guest.getFirstName()
+                            + " " + guest.getLastName() + "!"
+            );
+
+        } else {
+
+            welcomeLabel.setText("Welcome!");
+        }
+    }
 
     @FXML
     private void initialize() {
